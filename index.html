@@ -3,7 +3,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Donatı & Hasır Çelik Tahvil Hesabı</title>
+  <title>Donatı Eşdeğerlik Hesabı</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
@@ -11,10 +11,6 @@
       padding: 20px;
       max-width: 500px;
       margin: auto;
-    }
-    h2 {
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
     }
     select, input, button {
       padding: 12px;
@@ -38,100 +34,54 @@
       font-size: 18px;
       color: #333;
     }
-    .section {
-      margin-bottom: 40px;
-    }
   </style>
 </head>
 <body>
 
-  <div class="section">
-    <h2>1. Donatı Çapı Tahvil Hesabı</h2>
+  <h2>Donatı Eşdeğerlik Hesabı</h2>
 
-    <label>Kaynak Donatı Çapı (mm):</label>
-    <select id="source">
-      <option value="8">Ø8</option>
-      <option value="10">Ø10</option>
-      <option value="12">Ø12</option>
-      <option value="14">Ø14</option>
-      <option value="16">Ø16</option>
-      <option value="18">Ø18</option>
-      <option value="20">Ø20</option>
-      <option value="22">Ø22</option>
-      <option value="25">Ø25</option>
-      <option value="26">Ø26</option>
-      <option value="28">Ø28</option>
-      <option value="30">Ø30</option>
-      <option value="32">Ø32</option>
-      <option value="36">Ø36</option>
-    </select>
+  <label>Kaynak Donatı Çapı (mm):</label>
+  <select id="source">
+    <option value="8">Ø8</option>
+    <option value="10">Ø10</option>
+    <option value="12">Ø12</option>
+    <option value="14">Ø14</option>
+    <option value="16">Ø16</option>
+    <option value="18">Ø18</option>
+    <option value="20">Ø20</option>
+    <option value="22">Ø22</option>
+    <option value="25">Ø25</option>
+    <option value="26">Ø26</option>
+    <option value="28">Ø28</option>
+    <option value="30">Ø30</option>
+    <option value="32">Ø32</option>
+    <option value="36">Ø36</option>
+  </select>
 
-    <label>Adet:</label>
-    <input type="number" id="count" value="1" min="1" />
+  <label>Adet:</label>
+  <input type="number" id="count" value="1" min="1" />
 
-    <label>Hedef Donatı Çapı (mm):</label>
-    <select id="target">
-      <option value="8">Ø8</option>
-      <option value="10">Ø10</option>
-      <option value="12">Ø12</option>
-      <option value="14">Ø14</option>
-      <option value="16">Ø16</option>
-      <option value="18">Ø18</option>
-      <option value="20">Ø20</option>
-      <option value="22">Ø22</option>
-      <option value="25">Ø25</option>
-      <option value="26">Ø26</option>
-      <option value="28">Ø28</option>
-      <option value="30">Ø30</option>
-      <option value="32">Ø32</option>
-      <option value="36">Ø36</option>
-    </select>
+  <label>Hedef Donatı Çapı (mm):</label>
+  <select id="target">
+    <option value="8">Ø8</option>
+    <option value="10">Ø10</option>
+    <option value="12">Ø12</option>
+    <option value="14">Ø14</option>
+    <option value="16">Ø16</option>
+    <option value="18">Ø18</option>
+    <option value="20">Ø20</option>
+    <option value="22">Ø22</option>
+    <option value="25">Ø25</option>
+    <option value="26">Ø26</option>
+    <option value="28">Ø28</option>
+    <option value="30">Ø30</option>
+    <option value="32">Ø32</option>
+    <option value="36">Ø36</option>
+  </select>
 
-    <button onclick="calculate()">HESAPLA</button>
-    <div class="result" id="result"></div>
-  </div>
+  <button onclick="calculate()">HESAPLA</button>
 
-  <div class="section">
-    <h2>2. Hasır Çelik Tahvil Hesabı</h2>
-
-    <label>Hasır Tipi:</label>
-    <select id="hasirType">
-      <option value="Q">Q Tipi</option>
-      <option value="R">R Tipi</option>
-    </select>
-
-    <label>Hasır Kodu:</label>
-    <select id="hasirCode">
-      <option value="131">131</option>
-      <option value="189">189</option>
-      <option value="221">221</option>
-      <option value="335">335</option>
-    </select>
-
-    <label>Alan (m²):</label>
-    <input type="number" id="area" value="1" min="0.01" step="0.01" />
-
-    <label>Karşılaştırılacak Donatı Çapı (mm):</label>
-    <select id="compareRebar">
-      <option value="8">Ø8</option>
-      <option value="10">Ø10</option>
-      <option value="12">Ø12</option>
-      <option value="14">Ø14</option>
-      <option value="16">Ø16</option>
-      <option value="18">Ø18</option>
-      <option value="20">Ø20</option>
-      <option value="22">Ø22</option>
-      <option value="25">Ø25</option>
-      <option value="26">Ø26</option>
-      <option value="28">Ø28</option>
-      <option value="30">Ø30</option>
-      <option value="32">Ø32</option>
-      <option value="36">Ø36</option>
-    </select>
-
-    <button onclick="calculateHasir()">HESAPLA</button>
-    <div class="result" id="resultHasir"></div>
-  </div>
+  <div class="result" id="result"></div>
 
   <script>
     function donatiAlan(d) {
@@ -154,32 +104,8 @@
       const toplamAlan = adet * alan1;
       const esitAdet = toplamAlan / alan2;
 
-      document.getElementById("result").textContent =
-        `${adet} adet Ø${d1} donatı ≈ ${esitAdet.toFixed(2)} adet Ø${d2} donatıya eşdeğerdir.`;
-    }
-
-    function calculateHasir() {
-      const type = document.getElementById("hasirType").value;
-      const code = document.getElementById("hasirCode").value;
-      const area = parseFloat(document.getElementById("area").value);
-      const compareD = parseFloat(document.getElementById("compareRebar").value);
-
-      const hasirAlanlari = {
-        Q: {131: 377, 189: 544, 221: 636, 335: 964},
-        R: {131: 188, 189: 272, 221: 318, 335: 482}
-      };
-
-      if (!hasirAlanlari[type] || !hasirAlanlari[type][code] || area <= 0) {
-        document.getElementById("resultHasir").textContent = "Geçerli değerler giriniz.";
-        return;
-      }
-
-      const toplamAlan = area * hasirAlanlari[type][code];
-      const donatiAlanDegeri = donatiAlan(compareD);
-      const esitAdet = toplamAlan / donatiAlanDegeri;
-
-      document.getElementById("resultHasir").textContent =
-        `${area} m² ${type}${code} hasır çelik ≈ ${esitAdet.toFixed(2)} adet Ø${compareD} donatıya eşdeğerdir.`;
+      document.getElementById("result").textContent = 
+        `${adet} adet Ø${d1} donatı, yaklaşık ${esitAdet.toFixed(2)} adet Ø${d2} donatıya eşdeğerdir.`;
     }
   </script>
 
