@@ -1,140 +1,92 @@
+
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Donatı Eşdeğerlik Hesabı</title>
+  <title>Şantiye Hesap Araçları</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 500px;
-      margin: auto;
-      background-color: #ffffff;
-      color: #000000;
-    }
-
-    select, input, button {
-      padding: 12px;
-      margin: 10px 0;
-      width: 100%;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-
-    button {
-      background-color: #2196f3;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #1976d2;
-    }
-
-    .result {
-      margin-top: 20px;
-      font-weight: bold;
-      font-size: 18px;
-      color: inherit;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #121212;
-        color: #ffffff;
-      }
-
-      input, select {
-        background-color: #1e1e1e;
-        color: #ffffff;
-        border: 1px solid #444;
-      }
-
-      button {
-        background-color: #64b5f6;
-        color: #000;
-      }
-
-      button:hover {
-        background-color: #42a5f5;
-      }
-    }
-  </style>
-</head>
+  <link rel="stylesheet" href="styles.css">
+  </head>
 <body>
 
-  <h2>Donatı Eşdeğerlik Hesabı - Mustafa Burak BESLER</h2>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('donati')">Donatı Tahvil</div>
+    <div class="tab" onclick="switchTab('rho')">ρ Hesabı</div>
+    <div class="tab" onclick="switchTab('hakkinda')">Hakkında</div>
+  </div>
 
-  <label>Kaynak Donatı Çapı (mm):</label>
-  <select id="source">
-    <option value="8">Ø8</option>
-    <option value="10">Ø10</option>
-    <option value="12">Ø12</option>
-    <option value="14">Ø14</option>
-    <option value="16">Ø16</option>
-    <option value="18">Ø18</option>
-    <option value="20">Ø20</option>
-    <option value="22">Ø22</option>
-    <option value="25">Ø25</option>
-    <option value="26">Ø26</option>
-    <option value="28">Ø28</option>
-    <option value="30">Ø30</option>
-    <option value="32">Ø32</option>
-    <option value="36">Ø36</option>
-  </select>
+  <div id="donati" class="tab-content active">
+    <h2>Donatı Eşdeğerlik Hesabı</h2>
+    <label>Kaynak Donatı Çapı (mm):</label>
+    <select id="source">
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
 
-  <label>Adet:</label>
-  <input type="number" id="count" value="1" min="1" />
+    <label>Adet:</label>
+    <input type="number" id="count" value="1" min="1" />
 
-  <label>Hedef Donatı Çapı (mm):</label>
-  <select id="target">
-    <option value="8">Ø8</option>
-    <option value="10">Ø10</option>
-    <option value="12">Ø12</option>
-    <option value="14">Ø14</option>
-    <option value="16">Ø16</option>
-    <option value="18">Ø18</option>
-    <option value="20">Ø20</option>
-    <option value="22">Ø22</option>
-    <option value="25">Ø25</option>
-    <option value="26">Ø26</option>
-    <option value="28">Ø28</option>
-    <option value="30">Ø30</option>
-    <option value="32">Ø32</option>
-    <option value="36">Ø36</option>
-  </select>
+    <label>Hedef Donatı Çapı (mm):</label>
+    <select id="target">
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
 
-  <button onclick="calculate()">HESAPLA</button>
+    <button onclick="calculate()">HESAPLA</button>
+    <div class="result" id="result"></div>
+  </div>
 
-  <div class="result" id="result"></div>
+  <div id="rho" class="tab-content">
+    <h2>ρ<sub>min</sub> / ρ<sub>max</sub> Hesaplayıcı</h2>
+    <label>Eleman Tipi:</label>
+    <select id="eleman">
+      <option value="kolon">Kolon</option>
+      <option value="kiris">Kiriş</option>
+      <option value="doseme">Döşeme</option>
+    </select>
 
-  <script>
-    function donatiAlan(d) {
-      return Math.PI * Math.pow(d, 2) / 4;
-    }
+    <label>Genişlik b (mm):</label>
+    <input type="number" id="b" />
 
-    function calculate() {
-      const d1 = parseFloat(document.getElementById("source").value);
-      const adet = parseFloat(document.getElementById("count").value);
-      const d2 = parseFloat(document.getElementById("target").value);
+    <label>Etkin Yükseklik d (mm):</label>
+    <input type="number" id="d" />
 
-      if (adet <= 0 || isNaN(adet)) {
-        document.getElementById("result").textContent = "Lütfen geçerli bir adet girin.";
-        return;
-      }
+    <button onclick="calculateRho()">HESAPLA</button>
+    <div class="result" id="rhoResult"></div>
+  </div>
 
-      const alan1 = donatiAlan(d1);
-      const alan2 = donatiAlan(d2);
+  <div id="hakkinda" class="tab-content">
+    <h2>Hakkında</h2>
+    <p>Bu araç, sahada hızlıca donatı çap tahvili ve minimum/maksimum donatı oranlarını hesaplamak için tasarlanmıştır.</p>
+    <p>Hazırlayan: Mustafa Burak BESLER</p>
+  </div>
 
-      const toplamAlan = adet * alan1;
-      const esitAdet = toplamAlan / alan2;
-
-      document.getElementById("result").textContent = 
-        `${adet} adet Ø${d1} donatı, yaklaşık ${esitAdet.toFixed(2)} adet Ø${d2} donatıya eşdeğerdir.`;
-    }
-  </script>
+<script src="script.js"></script>
 
 </body>
 </html>
