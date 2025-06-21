@@ -1,4 +1,3 @@
-<style>
   :root {
     color-scheme: light dark;
   }
@@ -103,4 +102,11 @@
       color: #e0e0e0;
     }
   }
-</style>
+
+  .MJX_LiveRegion {
+    background-color: transparent !important;
+  }
+
+  .MJX_HoverRegion {
+    background-color: transparent !important;
+  }

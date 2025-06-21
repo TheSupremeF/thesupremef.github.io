@@ -2,21 +2,38 @@
       return Math.PI * Math.pow(d, 2) / 4;
     }
 
-    function calculate() {
-      const d1 = parseFloat(document.getElementById("source").value);
-      const adet = parseFloat(document.getElementById("count").value);
-      const d2 = parseFloat(document.getElementById("target").value);
-      if (adet <= 0 || isNaN(adet)) {
-        document.getElementById("result").textContent = "Lütfen geçerli bir adet girin.";
-        return;
-      }
-      const alan1 = donatiAlan(d1);
-      const alan2 = donatiAlan(d2);
-      const toplamAlan = adet * alan1;
-      const esitAdet = Math.ceil(toplamAlan / alan2);
-      document.getElementById("result").textContent = 
-        `${adet} adet Ø${d1} donatı, ${esitAdet} adet Ø${d2} donatıya eşdeğerdir.`;
+function calculate() {
+  const d1 = parseFloat(document.getElementById("source").value);
+  const adet = parseFloat(document.getElementById("count").value);
+  const d2 = parseFloat(document.getElementById("target").value);
+  const length = parseFloat(document.getElementById("length").value);
+
+  if (adet <= 0 || isNaN(adet)) {
+    document.getElementById("result").textContent = "Lütfen geçerli bir adet girin.";
+    return;
+  }
+
+  const alan1 = donatiAlan(d1);
+  const alan2 = donatiAlan(d2);
+  const toplamAlan = adet * alan1;
+  const esitAdet = Math.ceil(toplamAlan / alan2);
+
+  let resultText = `${adet} adet Ø${d1} donatı, ${esitAdet} adet Ø${d2} donatıyı sağlar.`;
+
+  if (length && length > 0 && esitAdet > 1) {
+    const d2cm = d2 / 10;
+    const sumD = d2cm * esitAdet;
+    const spacingRaw = (length - sumD) / (esitAdet - 1);
+
+    if (spacingRaw > 0) {
+      const spacing = Math.ceil(spacingRaw).toFixed(1); // Yukarı yuvarla ve tek ondalık göster
+      resultText += `\nDonatı aralığı: ${spacing} cm.`;
     }
+  }
+
+  document.getElementById("result").textContent = resultText;
+}
+
 
     function calculateRho() {
       const b = parseFloat(document.getElementById("b").value);
