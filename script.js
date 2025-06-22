@@ -75,7 +75,7 @@ function calculate() {
 		
 		const lOverlap = (0.12*(fydJ/fctdJ)*d_overlapJ)/10;
 		
-		let resultText_o = `Bindirme boyu ${lOverlap.toFixed(1)} cm'dir.`;
+		let resultText_o = `Kenetlenme boyu ${lOverlap.toFixed(1)} cm'dir.`;
 		document.getElementById("resultO").textContent = resultText_o;
 		
 	}

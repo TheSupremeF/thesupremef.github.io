@@ -10,15 +10,19 @@
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   </head>
 <body>
-
-  <div class="tabs">
+  <div class="appbar">
+    <h1>Şantiye Araç Kiti</h1>
+  </div>
+  <div-class="content">
+	<div class="tabs">
     <div class="tab active" onclick="switchTab('donati')">Donatı Tahvil</div>
     <div class="tab" onclick="switchTab('rho')">ρ Hesabı</div>
-	<div class="tab" onclick="switchTab('Kenetlenme')">Kenetlenme boyu hesaplama</div>
+	<div class="tab" onclick="switchTab('kenetlenme')">Kenetlenme boyu hesaplama</div>
     <div class="tab" onclick="switchTab('hakkinda')">Hakkında</div>
   </div>
+  </div>
 
-  <div id="donati" class="tab-content active">
+	<div id="donati" class="tab-content active">
     <h2>Donatı Eşdeğerlik Hesabı</h2>
     <label>Kaynak Donatı Çapı (mm):</label>
     <select id="source">
@@ -70,7 +74,7 @@
     <p>3. Düşey donatıda tahvil önerilmez.</p>
   </div>
 
-  <div id="rho" class="tab-content">
+	<div id="rho" class="tab-content">
     <h2>ρ<sub>min</sub> / ρ<sub>max</sub> Hesaplayıcı</h2>
     <label>Eleman Tipi:</label>
     <select id="eleman">
@@ -88,7 +92,7 @@
     <button onclick="calculateRho()">HESAPLA</button>
     <div class="result" id="rhoResult"></div>
   </div>
-  <div id="Kenetlenme" class="tab-content">
+	<div id="kenetlenme" class="tab-content">
   <h2>Kenetlenme boyu</h2>
 	<label>Donatı tasarım akma dayanımı:</label>
 	<select id="fyd">
@@ -130,7 +134,7 @@
       <option value="36">Ø36</option>
     </select>
 	<button onclick="calculateOverlap()">HESAPLA</button>
-    <div class="resultO" id="resultO"></div>
+    <div class="result" id="resultO"></div>
 		    <h4>Notlar:</h4>
 	  <p>
     Matematiksel formül:
@@ -158,6 +162,7 @@ l_b =
     <p>Bu araç, sahada hızlıca donatı çap tahvili ve minimum/maksimum donatı oranlarını hesaplamak için tasarlanmıştır.</p>
     <p>Hazırlayan: Mustafa Burak BESLER</p>
   </div>
+  
 <script src="script.js"></script>
 
 </body>
