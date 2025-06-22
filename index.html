@@ -14,7 +14,7 @@
   <div class="tabs">
     <div class="tab active" onclick="switchTab('donati')">Donatı Tahvil</div>
     <div class="tab" onclick="switchTab('rho')">ρ Hesabı</div>
-	<div class="tab" onclick="switchTab('bindirme')">Bindirme boyu hesaplama</div>
+	<div class="tab" onclick="switchTab('Kenetlenme')">Kenetlenme boyu hesaplama</div>
     <div class="tab" onclick="switchTab('hakkinda')">Hakkında</div>
   </div>
 
@@ -88,8 +88,8 @@
     <button onclick="calculateRho()">HESAPLA</button>
     <div class="result" id="rhoResult"></div>
   </div>
-  <div id="bindirme" class="tab-content">
-  <h2>Bindirme boyu</h2>
+  <div id="Kenetlenme" class="tab-content">
+  <h2>Kenetlenme boyu</h2>
 	<label>Donatı tasarım akma dayanımı:</label>
 	<select id="fyd">
 	<option value="220">220 MPa</option>
@@ -136,16 +136,22 @@
     Matematiksel formül:
   </p>
   <p>
-  \[
-  l_b = 0{,}12 \times \left( \frac{f_{yd}}{f_{ctd}} \right) \times \varnothing_{\text{donatı}}
-  \]
-
+\[
+l_b =
+\begin{cases}
+0{,}12 \times \left( \dfrac{f_{yd}}{f_{ctd}} \right) \times \phi_{\text{donatı}} \\
+20\phi
+\end{cases}
+\]
   </p>
     <div class="math-block">
     <div class="math-line">\( f_{yd} \): Donatı tasarım akma dayanımı</div>
     <div class="math-line">\( f_{ctd} \): Beton tasarım çekme dayanımı</div>
     <div class="math-line">\( \varnothing_{\text{donatı}} \): Donatı çapı</div>
   </div>
+  <p>TS500 - 9.1.2.1<p>
+  &nbsp;
+  <p>1. Eğer kenetlenme hesabı 20Ø'den kısaysa, kenetlenme 20Ø alınır.</p>
   </div>
   <div id="hakkinda" class="tab-content">
     <h2>Hakkında</h2>
