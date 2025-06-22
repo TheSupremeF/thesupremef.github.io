@@ -68,6 +68,17 @@ function calculate() {
       `;
     }
 
+	function calculateOverlap() {
+		const fydJ = parseFloat(document.getElementById("fyd").value);
+		const fctdJ = parseFloat(document.getElementById("fctd").value);
+		const d_overlapJ = parseFloat(document.getElementById("d_overlap").value);
+		
+		const lOverlap = (0.12*(fydJ/fctdJ)*d_overlapJ)/10;
+		
+		let resultText_o = `Bindirme boyu ${lOverlap.toFixed(1)} cm'dir.`;
+		document.getElementById("resultO").textContent = resultText_o;
+		
+	}
     function switchTab(tabId) {
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));

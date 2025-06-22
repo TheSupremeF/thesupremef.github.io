@@ -30,7 +30,6 @@
       <option value="18">Ø18</option>
       <option value="20">Ø20</option>
       <option value="22">Ø22</option>
-      <option value="22">Ø22</option>
       <option value="24">Ø24</option>
       <option value="25">Ø25</option>
       <option value="26">Ø26</option>
@@ -53,6 +52,7 @@
       <option value="18">Ø18</option>
       <option value="20">Ø20</option>
       <option value="22">Ø22</option>
+	  <option value="24">Ø24</option>
       <option value="25">Ø25</option>
       <option value="26">Ø26</option>
       <option value="28">Ø28</option>
@@ -89,14 +89,63 @@
     <div class="result" id="rhoResult"></div>
   </div>
   <div id="bindirme" class="tab-content">
-  <p>
+  <h2>Bindirme boyu</h2>
+	<label>Donatı tasarım akma dayanımı:</label>
+	<select id="fyd">
+	<option value="220">220 MPa</option>
+	<option value="420">420 MPa</option>
+	<option value="500">500 MPa</option>
+	</select>
+
+	<label>Beton sınıfı:</label>
+	<select id="fctd">
+	<option value="0.87">C14</option>
+	<option value="0.93">C16</option>
+	<option value="1.00">C18</option>
+	<option value="1.04">C20</option>
+	<option value="1.17">C25</option>
+	<option value="1.28">C30</option>
+	<option value="1.38">C35</option>
+	<option value="1.48">C40</option>
+	<option value="1.57">C45</option>
+	<option value="1.65">C50</option>
+	</select>
+	
+	<label>Donatı Çapı (mm):</label>
+	<select id="d_overlap">
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+	  <option value="24">Ø24</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
+	<button onclick="calculateOverlap()">HESAPLA</button>
+    <div class="resultO" id="resultO"></div>
+		    <h4>Notlar:</h4>
+	  <p>
     Matematiksel formül:
   </p>
   <p>
-    \[
-    l_b = 0{,}12 \times \left( \frac{f_{yd}}{f_{ctd}} \right) \times Ø_{donatı}
-    \]
+  \[
+  l_b = 0{,}12 \times \left( \frac{f_{yd}}{f_{ctd}} \right) \times \varnothing_{\text{donatı}}
+  \]
+
   </p>
+    <div class="math-block">
+    <div class="math-line">\( f_{yd} \): Donatı tasarım akma dayanımı</div>
+    <div class="math-line">\( f_{ctd} \): Beton tasarım çekme dayanımı</div>
+    <div class="math-line">\( \varnothing_{\text{donatı}} \): Donatı çapı</div>
+  </div>
   </div>
   <div id="hakkinda" class="tab-content">
     <h2>Hakkında</h2>

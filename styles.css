@@ -36,7 +36,12 @@
     font-size: 18px;
     color: inherit;
   }
-
+  .resultO {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 18px;
+    color: inherit;
+  }
   .tabs {
     display: flex;
     margin-top: 20px;
@@ -110,3 +115,11 @@
   .MJX_HoverRegion {
     background-color: transparent !important;
   }
+  .math-block {
+      text-align: left;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+	.math-line {
+      margin-bottom: 10px;
+    }
