@@ -108,13 +108,6 @@ document.getElementById("resultO").textContent = resultText_o;
 }
 
 
-	
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
-      document.getElementById(tabId).classList.add('active');
-    }
   window.addEventListener("DOMContentLoaded", () => {
     const appbar = document.querySelector(".appbar");
     if (appbar) {
