@@ -1,0 +1,262 @@
+:root {
+  color-scheme: light dark;
+  --border-color-light: black;
+  --border-color-dark: #ccc;
+  --border-color: var(--border-color-light);
+}
+
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+  background-color: #fff;
+  color: #000;
+  padding-top: 50px;
+
+  /* border-color için değişken */
+  --border-color: var(--border-color-light);
+}
+
+.appbar {
+  background-color: #1976d2; /* koyu mavi-gri ton */
+  color: #fff;
+  padding-top: 2%;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.appbar h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.content {
+  padding: 100px 20px 20px 20px; /* üstte AppBar’a yer bırak */
+  max-width: 800px;
+  margin-top: 80px;
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+select, input, button {
+  padding: 12px;
+  margin: 10px 0;
+  width: 100%;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1976d2;
+}
+
+.result, .resultO {
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 18px;
+  color: inherit;
+}
+
+.tabs {
+  display: flex;
+  margin-top: 20px; /* AppBar ile arasında boşluk */
+  border-bottom: 2px solid #ccc;
+  padding: 0 10px; /* sağ ve sol padding */
+  max-width: 100%;
+  box-sizing: border-box;
+  border-color: #1976d2;
+}
+
+.tab {
+  flex: 1;
+  min-width: 0; /* taşmayı engeller */
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  background: #1976d2;
+  border: 1px solid #ccc;
+  border-bottom: none;
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab.active {
+  background: #fff;
+  border: 2px solid #ccc;
+  border-bottom: none;
+  color: #000;
+
+  /* Aynı ortalama */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-underline {
+  height: 8px;
+  background-color: #1976d2;
+  width: 100%;
+}
+
+/* Dark mode */
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #e0e0e0;
+    --border-color: var(--border-color-dark);
+  }
+
+  .tab {
+    background: #798791;
+    border-color: #555;
+    color: #ccc;
+  }
+
+  .tab.active {
+    background: #286270;
+    border-color: #777;
+    color: #fff;
+  }
+
+  select, input {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #555;
+  }
+
+  button {
+    background-color: #2196f3;
+    color: white;
+  }
+
+  button:hover {
+    background-color: #1976d2;
+  }
+
+  .result {
+    color: #e0e0e0;
+  }
+}
+
+/* MathJax arka planlarını temizle */
+.MJX_LiveRegion,
+.MJX_HoverRegion {
+  background-color: transparent !important;
+}
+
+.math-block {
+  text-align: left;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.math-line {
+  margin-bottom: 10px;
+}
+
+.title {
+  text-align: center;
+}
+
+#placementDiv {
+  display: flex;            /* Flex konteyner yapar */
+  justify-content: center;  /* Yatayda ortalar */
+  align-items: center;      /* Dikeyde ortalar */
+  margin-top: 20px;
+  overflow-x: auto;         /* Taşma olursa yatay scroll */
+  padding-bottom: 10px;
+}
+
+
+.donati-circle {
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background-color: transparent;
+  box-sizing: border-box;
+
+  /* Boyutlar orantılı ve yüzde veya max-width ile ayarlanıyor */
+  width: 1vw;    /* viewport genişliğinin %6'sı */
+  height: 1vw;
+  max-width: 20px;  /* Maksimum 40px */
+  max-height: 20px;
+  min-width: 12px;  /* Minimum 24px */
+  min-height: 12px;
+}
+
+.spacing-line {
+  position: relative;
+  flex-shrink: 0;
+  height: 2px;
+  width: 1vw;
+  max-width: 20px;
+  min-width: 12px;
+  background-color: transparent;
+}
+
+.spacing-label {
+  position: absolute; /* biraz aşağıya çekildi */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  display: none;
+  color: var(--border-color); /* Yazı rengi */
+}
+.spacing-line:first-of-type {
+  position: relative;
+  background-color: var(--border-color);
+}
+
+/* Sol uç tick */
+.spacing-line:first-of-type::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 8px;
+  background-color: var(--border-color);
+  transform: translateY(-50%);
+}
+
+/* Sağ uç tick */
+.spacing-line:first-of-type::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 2px;
+  height: 8px;
+  background-color: var(--border-color);
+  transform: translateY(-50%);
+}

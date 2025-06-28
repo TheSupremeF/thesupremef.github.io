@@ -4,22 +4,26 @@
   <meta charset="UTF-8" />
   <title>Şantiye Hesap Araçları</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
   <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/donatiCalculations.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/layout.js"></script>
 </head>
 <body>
   <div class="appbar">
     <h1>Şantiye Araç Kiti</h1>
     <div class="tabs">
-      <div class="tab active" data-index="0" onclick="switchTab('donati')">Donatı tahvil</div>
-      <div class="tab" data-index="1" onclick="switchTab('rho')">Donatı kesit alanı</div>
-      <div class="tab" data-index="2" onclick="switchTab('kenetlenme')">Kenetlenme boyu</div>
-      <div class="tab" data-index="3" onclick="switchTab('hakkinda')">Hakkında</div>
+      <div class="tab active" data-index="0">Donatı tahvil</div>
+      <div class="tab" data-index="1">Donatı kesit alanı</div>
+      <div class="tab" data-index="2">Kenetlenme boyu</div>
+      <div class="tab" data-index="3">Hakkında</div>
     </div>
     <div class="tab-underline"></div>
   </div>
 
-  <div id="donati" tab-data-index="0" class="tab-content active">
+  <div id="donati" data-index="0" class="tab-content active">
     <h2>Donatı Eşdeğerlik Hesabı</h2>
     <label>Kaynak Donatı Çapı (mm):</label>
     <select id="source">
@@ -39,7 +43,6 @@
       <option value="30">Ø30</option>
       <option value="32">Ø32</option>
       <option value="36">Ø36</option>
-      <!-- ... -->
     </select>
 
     <label>Adet:</label>
@@ -63,7 +66,6 @@
       <option value="30">Ø30</option>
       <option value="32">Ø32</option>
       <option value="36">Ø36</option>
-      <!-- ... -->
     </select>
 
     <label>Toplam genişlik (cm):</label>
@@ -71,6 +73,8 @@
 
     <button onclick="calculate()">HESAPLA</button>
     <div class="result" id="result"></div>
+	
+	<div id="placementDiv" style="display:flex; align-items:center; margin-top:20px;"></div>
 
     <h4>Notlar:</h4>
     <p>1. Donatı yerleşimleri temel ve döşemede aynı aralıkta yapılmalıdır.</p>
@@ -97,81 +101,80 @@
     <div class="result" id="rhoResult"></div>
   </div>
 
-<div id="kenetlenme" data-index="2" class="tab-content">
-  <h2>Kenetlenme boyu</h2>
-  <label>Donatı akma dayanımı(fyk):</label>
-  <select id="fyk">
-    <option value="220">220 MPa</option>
-    <option value="420">420 MPa</option>
-    <option value="500">500 MPa</option>
-  </select>
+  <div id="kenetlenme" data-index="2" class="tab-content">
+    <h2>Kenetlenme boyu</h2>
+    <label>Donatı akma dayanımı(fyk):</label>
+    <select id="fyk">
+      <option value="220">220 MPa</option>
+      <option value="420">420 MPa</option>
+      <option value="500">500 MPa</option>
+    </select>
 
-  <label>Beton sınıfı:</label>
-  <select id="fck">
-    <option value="14">C14</option>
-    <option value="16">C16</option>
-    <option value="18">C18</option>
-    <option value="20">C20</option>
-    <option value="25">C25</option>
-    <option value="30">C30</option>
-    <option value="35">C35</option>
-    <option value="40">C40</option>
-    <option value="45">C45</option>
-    <option value="50">C50</option>
-  </select>
+    <label>Beton sınıfı:</label>
+    <select id="fck">
+      <option value="14">C14</option>
+      <option value="16">C16</option>
+      <option value="18">C18</option>
+      <option value="20">C20</option>
+      <option value="25">C25</option>
+      <option value="30">C30</option>
+      <option value="35">C35</option>
+      <option value="40">C40</option>
+      <option value="45">C45</option>
+      <option value="50">C50</option>
+    </select>
 
-  <label>Donatı Çapı (mm):</label>
-  <select id="d_overlap">
-    <option value="8">Ø8</option>
-    <option value="10">Ø10</option>
-    <option value="12">Ø12</option>
-    <option value="14">Ø14</option>
-    <option value="16">Ø16</option>
-    <option value="18">Ø18</option>
-    <option value="20">Ø20</option>
-    <option value="22">Ø22</option>
-    <option value="24">Ø24</option>
-    <option value="25">Ø25</option>
-    <option value="26">Ø26</option>
-    <option value="28">Ø28</option>
-    <option value="30">Ø30</option>
-    <option value="32">Ø32</option>
-    <option value="36">Ø36</option>
-  </select>
-  <button onclick="calculateOverlap()">HESAPLA</button>
-  <div class="result" id="resultO"></div>
+    <label>Donatı Çapı (mm):</label>
+    <select id="d_overlap">
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+      <option value="24">Ø24</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
+    <button onclick="calculateOverlap()">HESAPLA</button>
+    <div class="result" id="resultO"></div>
 
-  <h4>Notlar:</h4>
+    <h4>Notlar:</h4>
 
-  <p>Kenetlenme boyu:</p>
-  <p>
-\[
-l_b =
-\begin{cases}
-0{,}12 \times \left( \dfrac{f_{yd}}{f_{ctd}} \right) \times \phi_{\text{donatı}} \\
-20\phi
-\end{cases}
-\]
-  </p>
-
-  <p>Bindirme boyu:</p>
-  <p>
+    <p>Kenetlenme boyu:</p>
+    <p>
     \[
-    l_{o} = 1{,}4 \times \left( 1 + 0{,}5 \times r \right) \times l_b
+    l_b =
+    \begin{cases}
+    0{,}12 \times \left( \dfrac{f_{yd}}{f_{ctd}} \right) \times \phi_{\text{donatı}} \\
+    20\phi
+    \end{cases}
     \]
-  </p>
+    </p>
 
-  <div class="math-block">
-    <div class="math-line">\( f_{yd} \): Donatı tasarım akma dayanımı</div>
-    <div class="math-line">\( f_{ctd} \): Beton tasarım çekme dayanımı</div>
-    <div class="math-line">\( \varnothing \): Donatı çapı</div>
-    <div class="math-line">\( r \): Artırma katsayısı (örnek: 0,3)</div>
+    <p>Bindirme boyu:</p>
+    <p>
+      \[
+      l_{o} = 1{,}4 \times \left( 1 + 0{,}5 \times r \right) \times l_b
+      \]
+    </p>
+
+    <div class="math-block">
+      <div class="math-line">\( f_{yd} \): Donatı tasarım akma dayanımı</div>
+      <div class="math-line">\( f_{ctd} \): Beton tasarım çekme dayanımı</div>
+      <div class="math-line">\( \varnothing \): Donatı çapı</div>
+      <div class="math-line">\( r \): Artırma katsayısı (örnek: 0,3)</div>
+    </div>
+
+    <p>TS500 - 9.1.2.1</p>
+    <p>1. Eğer kenetlenme hesabı 20Ø'den kısaysa, kenetlenme 20Ø alınır.</p>
   </div>
-
-  <p>TS500 - 9.1.2.1</p>
-  <p>1. Eğer kenetlenme hesabı 20Ø'den kısaysa, kenetlenme 20Ø alınır.</p>
-</div>
-
 
   <div id="hakkinda" data-index="3" class="tab-content">
     <h2>Hakkında</h2>
@@ -179,6 +182,5 @@ l_b =
     <p>Hazırlayan: Mustafa Burak BESLER</p>
   </div>
 
-  <script src="script.js"></script>
 </body>
 </html>
