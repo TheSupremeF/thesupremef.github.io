@@ -2,12 +2,33 @@ function drawDonatiWithSpacing(adet, spacing) {
   const placementDiv = document.getElementById('placementDiv');
   placementDiv.innerHTML = '';
 
-  for (let i = 0; i < adet; i++) {
+  const targetDiameter = document.getElementById("target").value;
+
+  for (let i = 0; i < 2; i++) {
+    // Donatıyı saran wrapper
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('donati-wrapper');
+
+    // Donatı dairesi
     const circle = document.createElement('div');
     circle.classList.add('donati-circle');
-    placementDiv.appendChild(circle);
 
-    if (i < adet - 1) {
+    // Çap oku çizgisi
+    const line = document.createElement('div');
+    line.classList.add('diameter-line');
+
+    // Çap yazısı
+    const text = document.createElement('div');
+    text.classList.add('diameter-text');
+    text.textContent = `⌀${targetDiameter}`;
+
+    // Yapıya ekle
+    wrapper.appendChild(circle);
+    wrapper.appendChild(line);
+    wrapper.appendChild(text);
+    placementDiv.appendChild(wrapper);
+
+    if (i < 2) {
       const spacingLine = document.createElement('div');
       spacingLine.classList.add('spacing-line');
 
@@ -15,39 +36,57 @@ function drawDonatiWithSpacing(adet, spacing) {
       label.classList.add('spacing-label');
       label.textContent = spacing.toFixed(0) + ' cm';
 
-      // Sadece ilk spacing line için label ve çizgiler görünür
       if (i === 0) {
         label.style.display = 'block';
         spacingLine.style.backgroundColor = 'var(--border-color)';
 
-        // Mimari tick için iki küçük çizgi (div) ekle
         const tickLeft = document.createElement('div');
         const tickRight = document.createElement('div');
+        const lineLeft = document.createElement('div');
+        const lineRight = document.createElement('div');
 
         tickLeft.style.cssText = `
           position: absolute;
           left: 0;
           top: 50%;
-          width: 2px;
+          width: 1px;
           height: 8px;
           background-color: var(--border-color);
           transform: translateY(-50%) rotate(45deg);
-		  
         `;
         tickRight.style.cssText = `
           position: absolute;
           right: 0;
           top: 50%;
-          width: 2px;
+          width: 1px;
           height: 8px;
           background-color: var(--border-color);
           transform: translateY(-50%) rotate(45deg);
+        `;
+        lineLeft.style.cssText = `
+          position: absolute;
+          left: 0;
+          top: 50%;
+          width: 1px;
+          height: 8px;
+          background-color: var(--border-color);
+          transform: translateY(-50%);
+        `;
+        lineRight.style.cssText = `
+          position: absolute;
+          right: 0;
+          top: 50%;
+          width: 1px;
+          height: 8px;
+          background-color: var(--border-color);
+          transform: translateY(-50%);
         `;
 
         spacingLine.style.position = 'relative';
         spacingLine.appendChild(tickLeft);
         spacingLine.appendChild(tickRight);
-
+        spacingLine.appendChild(lineLeft);
+        spacingLine.appendChild(lineRight);
       } else {
         label.style.display = 'none';
         spacingLine.style.backgroundColor = 'transparent';
@@ -58,7 +97,6 @@ function drawDonatiWithSpacing(adet, spacing) {
     }
   }
 }
-
 
 function calculate() {
   const d1 = parseFloat(document.getElementById("source").value);

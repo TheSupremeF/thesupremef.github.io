@@ -194,6 +194,13 @@ button:hover {
   padding-bottom: 10px;
 }
 
+.donati-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+
 
 .donati-circle {
   flex-shrink: 0;
@@ -202,36 +209,55 @@ button:hover {
   background-color: transparent;
   box-sizing: border-box;
 
-  /* Boyutlar orantılı ve yüzde veya max-width ile ayarlanıyor */
-  width: 1vw;    /* viewport genişliğinin %6'sı */
-  height: 1vw;
-  max-width: 20px;  /* Maksimum 40px */
-  max-height: 20px;
-  min-width: 12px;  /* Minimum 24px */
-  min-height: 12px;
+  width: 3vw;          /* previously 1.5vw */
+  height: 3vw;
+  max-width: 40px;     /* previously 20px */
+  max-height: 40px;
+  min-width: 24px;     /* previously 12px */
+  min-height: 24px;
+}
+
+.diameter-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 1px;
+  background-color: var(--border-color);
+  transform: rotate(135deg);
+  transform-origin: center left;
+}
+
+.diameter-text {
+  position: absolute;
+  font-size: 11px;/* teknik çizime uygun istersen kırmızı */
+  white-space: nowrap;
 }
 
 .spacing-line {
   position: relative;
   flex-shrink: 0;
-  height: 2px;
-  width: 1vw;
-  max-width: 20px;
-  min-width: 12px;
+  height: 1px;         /* previously 2px */
+  width: 1vw;          /* previously 1vw */
+  max-width: 40px;     /* previously 20px */
+  min-width: 24px;     /* previously 12px */
   background-color: transparent;
+  margin: 2px;         /* optionally increased for spacing */
 }
 
 .spacing-label {
-  position: absolute; /* biraz aşağıya çekildi */
+  position: absolute;
   left: 50%;
+  top: 50%;
   transform: translateX(-50%);
-  font-size: 9px;
+  font-size: 11px;     /* optionally increased */
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
   display: none;
-  color: var(--border-color); /* Yazı rengi */
+  color: var(--border-color);
 }
+
 .spacing-line:first-of-type {
   position: relative;
   background-color: var(--border-color);
@@ -243,8 +269,8 @@ button:hover {
   position: absolute;
   left: 0;
   top: 50%;
-  width: 2px;
-  height: 8px;
+  width: 3px;         /* previously 2px */
+  height: 12px;       /* previously 8px */
   background-color: var(--border-color);
   transform: translateY(-50%);
 }
@@ -255,8 +281,16 @@ button:hover {
   position: absolute;
   right: 0;
   top: 50%;
-  width: 2px;
-  height: 8px;
+  width: 3px;
+  height: 12px;
   background-color: var(--border-color);
   transform: translateY(-50%);
+}
+
+.donati-diameter {
+  display: block;
+  text-align: center;
+  font-size: 16px;
+  color: var(--border-color);
+  margin-top: 2px;
 }
