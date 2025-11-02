@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Kod Oluşturucu (Tek Input)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html,body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#0f172a;color:#e2e8f0}
+    .wrap{max-width:640px;margin:6vh auto;padding:24px}
+    h1{font-size:22px;margin:0 0 16px}
+    p{margin:0 0 14px;color:#94a3b8}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}
+    input[type="text"]{flex:1;min-width:260px;padding:12px 14px;border-radius:10px;border:1px solid #334155;background:#111827;color:#e5e7eb;outline:none}
+    button{padding:12px 16px;border-radius:10px;border:0;background:#22c55e;color:#052e16;font-weight:700;cursor:pointer}
+    button.secondary{background:#334155;color:#e2e8f0}
+    .out{display:flex;gap:10px;align-items:center;margin-top:10px}
+    .code{font:700 18px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;background:#111827;border:1px solid #334155;border-radius:10px;padding:12px 14px;min-width:220px}
+    .note{font-size:12px;color:#94a3b8;margin-top:8px}
+    .error{color:#fecaca;background:#7f1d1d;border:1px solid #ef4444;padding:8px 10px;border-radius:8px;display:none;margin-top:8px}
+    .ok{color:#bbf7d0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Kod Oluşturucu</h1>
+    <p>Format: <b>İlk adın ilk harfi</b> + <b>soyadın ilk 4 harfi</b> + <b>soyadın son harfi</b> + <b>3 haneli sayı</b></p>
+
+    <div class="row">
+      <input id="full" type="text" placeholder="Ad Soyad (örn. Mustafa Burak BESLER)" autocomplete="off" />
+      <button id="gen">Oluştur</button>
+    </div>
+
+    <div class="error" id="err"></div>
+
+    <div class="out">
+      <div class="code" id="code">—</div>
+      <button class="secondary" id="copy" disabled>Kopyala</button>
+    </div>
+
+    <div class="note">İpucu: “Çağrı Yılmaz”, “Cemre Nur Öztürk”, “Ahmet Can Dönmez” gibi yazabilirsin. İlk kelime isim, son kelime soyad kabul edilir.</div>
+  </div>
+
+  <script>
+    // Türkçe karakter normalizasyonu (diakritiklerden arındırma + TR harf eşlemeleri)
+    function normalizeTR(text) {
+      const map = {
+        'ç':'c','Ç':'C',
+        'ğ':'g','Ğ':'G',
+        'ı':'i','I':'I',
+        'İ':'i',
+        'ö':'o','Ö':'O',
+        'ş':'s','Ş':'S',
+        'ü':'u','Ü':'U'
+      };
+      const replaced = text.replace(/[çğıİöşüÇĞIİÖŞÜ]/g, ch => map[ch] ?? ch);
+      // Olası başka aksanları da temizle (Unicode diakritik)
+      return replaced.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+    }
+
+    function threeDigitRandom() {
+      return String(Math.floor(Math.random() * 1000)).padStart(3, '0'); // 000–999
+    }
+
+    function generateFromSingleInput(fullName) {
+      if (!fullName) throw new Error('Lütfen bir ad soyad girin.');
+      // İç içe boşluk, tire, apostrof gibi araları düzenle
+      const tokens = fullName
+        .trim()
+        .replace(/\s+/g, ' ')
+        .split(' ')
+        .filter(Boolean);
+
+      if (tokens.length < 2) {
+        throw new Error('Soyadı bulunamadı. Lütfen “Ad Soyad” şeklinde yazın.');
+      }
+
+      const firstNameRaw = tokens[0];
+      const lastNameRaw  = tokens[tokens.length - 1]; // son kelime soyad kabul
+
+      // Normalize + büyük
+      const f = normalizeTR(firstNameRaw).toUpperCase();
+      const l = normalizeTR(lastNameRaw.replace(/['’\- ]+/g, '')).toUpperCase();
+
+      if (!f.length || !l.length) {
+        throw new Error('İsim/soyisim geçersiz harf içeriyor.');
+      }
+
+      const firstInitial = f[0];
+      const first4OfLast = l.slice(0, 4);             // 4 harften azsa mevcut kadar
+      const lastCharOfLast = l[l.length - 1];
+      const rand = threeDigitRandom();
+
+      return `${firstInitial}${first4OfLast}${lastCharOfLast}${rand}`;
+    }
+
+    // UI
+    const $full = document.getElementById('full');
+    const $gen  = document.getElementById('gen');
+    const $code = document.getElementById('code');
+    const $copy = document.getElementById('copy');
+    const $err  = document.getElementById('err');
+
+    function setError(msg) {
+      $err.textContent = msg;
+      $err.style.display = 'block';
+      $copy.disabled = true;
+      $code.textContent = '—';
+    }
+    function clearError() {
+      $err.style.display = 'none';
+    }
+
+    function generate() {
+      clearError();
+      try {
+        const code = generateFromSingleInput($full.value);
+        $code.textContent = code;
+        $copy.disabled = false;
+      } catch (e) {
+        setError(e.message || 'Bilinmeyen hata.');
+      }
+    }
+
+    $gen.addEventListener('click', generate);
+    $full.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') generate();
+    });
+
+    $copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText($code.textContent);
+        $copy.textContent = 'Kopyalandı ✓';
+        setTimeout(() => ($copy.textContent = 'Kopyala'), 1200);
+      } catch {
+        $copy.textContent = 'Kopyalanamadı';
+        setTimeout(() => ($copy.textContent = 'Kopyala'), 1200);
+      }
+    });
+
+    // Örnek içerik
+    $full.value = 'Mustafa Burak BESLER';
+  </script>
+</body>
+</html>
