@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>EPP 4NM - Interaktif Vaziyet Planı V1</title>
+
+  <!-- Material Symbols Outlined (MD3 ikon seti) -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo" class="logo" />
+    <span class="chip">İnteraktif Vaziyet Planı</span>
+
+    <span id="lastExportLabel" class="chip last-export">Son kayıt: -</span>
+    <span id="projectNameLabel" class="chip" style="display:none;"></span>
+
+    <div class="spacer"></div>
+
+    <button id="projectInfoBtn"
+            class="icon-top-button"
+            title="Proje bilgileri"
+            style="display:none">
+      <span class="material-symbols-outlined">info</span>
+    </button>
+
+    <button id="passwordSettingsBtn"
+            class="icon-top-button"
+            title="Düzenleme PIN'i"
+            style="display:none">
+      <span class="material-symbols-outlined">vpn_key</span>
+    </button>
+
+    <div class="mode-toggle" id="modeToggle">
+      <button data-mode="viewer" class="active">Görüntüle</button>
+      <button data-mode="editor">Düzenle</button>
+    </div>
+
+    <button id="aboutBtn" class="icon-top-button" title="Hakkında">
+      <span class="material-symbols-outlined">info</span>
+    </button>
+  </header>
+
+  <main>
+    <div class="canvas-column">
+      <div class="toolbar">
+        <label
+          id="mainImageWrapper"
+          class="icon-button"
+          title="Ana görsel yükle (yalnızca düzenleme modunda)"
+          style="display:none">
+          <span class="material-symbols-outlined">image</span>
+          <input type="file" id="mainImageInput" accept="image/*">
+        </label>
+
+        <label title="İmalat görünümü">
+          <select id="workViewSelect"></select>
+        </label>
+
+        <button id="resetViewBtn" title="Görünümü sıfırla">
+          <span class="material-symbols-outlined">restart_alt</span>
+        </button>
+        <button id="panModeBtn" title="Pan modunu aç/kapat">
+          <span class="material-symbols-outlined">pan_tool_alt</span>
+        </button>
+        <button id="labelsBtn" title="Hotspot etiketlerini göster/gizle">
+          <span class="material-symbols-outlined">label</span>
+        </button>
+        <button id="addHotspotBtn" title="Yeni hotspot oluştur" style="display:none">
+          <span class="material-symbols-outlined">add_box</span>
+        </button>
+        <button id="exportBtn" title="Kaydet">
+          <span class="material-symbols-outlined">download</span>
+        </button>
+        <button id="importBtn" title="Aç">
+          <span class="material-symbols-outlined">upload</span>
+        </button>
+        <button id="summaryBtn" title="İmalat türlerine göre toplam kişi sayıları">
+          <span class="material-symbols-outlined">summarize</span>
+        </button>
+
+        <input type="file" id="importInput" accept=".epp,.zip,application/zip" style="display:none">
+      </div>
+
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <div id="viewport">
+          <img id="mainImage" alt="Vaziyet planı">
+          <div id="hotspotLayer"></div>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <header>Detaylar</header>
+      <div class="side-body" id="sideBody"></div>
+    </aside>
+  </main>
+
+  <!-- Hakkında -->
+  <div id="aboutOverlay" class="modal-backdrop">
+    <div class="modal-dialog">
+      <h2>Hakkında</h2>
+      <img src="about-logo.png" alt="Hakkında Logo" class="about-logo">
+      <p style="margin-top:8px;font-size:12px;">2025 (C)</p>
+      <p class="hint">Kapatmak için pencere dışına tıklayın.</p>
+    </div>
+  </div>
+
+  <!-- Düzenleme PIN ayarı -->
+  <div id="passwordSettingsOverlay" class="modal-backdrop">
+    <div class="modal-dialog">
+      <h2>Düzenleme PIN'i</h2>
+      <p>Bu dosya için 4 haneli bir düzenleme PIN'i belirleyebilirsin. Tüm kutuları boş bırakırsan koruma kaldırılır.</p>
+      <div class="pin-row" id="passwordSettingsPin">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+      </div>
+      <div class="modal-actions">
+        <button id="passwordSettingsCancel">Vazgeç</button>
+        <button id="passwordSettingsSave">Kaydet</button>
+      </div>
+      <p class="hint">Bu PIN EPP içindeki config.json’da düz metin olarak saklanır.</p>
+    </div>
+  </div>
+
+  <!-- Düzenleme PIN prompt -->
+  <div id="passwordPromptOverlay" class="modal-backdrop">
+    <div class="modal-dialog">
+      <h2>Düzenleme kilitli</h2>
+      <p>Düzenleme moduna geçmek için PIN gir.</p>
+      <div class="pin-row" id="passwordPromptPin">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
+      </div>
+      <div class="modal-actions">
+        <button id="passwordPromptCancel">İptal</button>
+        <button id="passwordPromptOk">Devam</button>
+      </div>
+      <p class="hint">4 haneli PIN.</p>
+    </div>
+  </div>
+
+  <!-- Proje bilgileri -->
+  <div id="projectInfoOverlay" class="modal-backdrop">
+    <div class="modal-dialog">
+      <h2>Proje bilgileri</h2>
+      <p>Bu EPP dosyasına ait proje adını ve yükleniciyi kaydedebilirsin.</p>
+      <label for="projectNameInput">Proje adı</label>
+      <input type="text" id="projectNameInput" placeholder="Örn. KAHRAMANMARAŞ DULKADİROĞLU MERKEZ 15 2. ETAP 1. KISIM KONUT VE TİCARET İNŞAATLARI İLE ALTYAPI VE ÇEVRE DÜZENLEME İŞİ">
+      <label for="projectContractorInput" style="margin-top:8px;">Yüklenici</label>
+      <input type="text" id="projectContractorInput" placeholder="Örn. SUR YAPI Endüstri San. ve Tic. A.Ş.">
+      <div class="modal-actions">
+        <button id="projectInfoCancel">Vazgeç</button>
+        <button id="projectInfoSave">Kaydet</button>
+      </div>
+      <p class="hint">Bu bilgiler EPP içindeki config.json’da düz metin olarak saklanır.</p>
+    </div>
+  </div>
+
+  <!-- Detay görseli büyük gösterme -->
+  <div id="detailImageOverlay" class="modal-backdrop">
+    <div class="modal-dialog" id="detailImageDialog">
+      <img id="detailImageLarge" alt="Detay" />
+    </div>
+  </div>
+
+  <!-- JSZip CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <!-- App scripts (order matters) -->
+  <script src="js/constants.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/events.js"></script>
+</body>
+</html>
