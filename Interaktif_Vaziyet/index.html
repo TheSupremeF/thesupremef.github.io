@@ -595,7 +595,7 @@
     <span class="chip">İnteraktif Vaziyet Planı</span>
 
     <span id="lastExportLabel" class="chip last-export">Son kayıt: -</span>
-    <span id="projectNameLabel" class="chip project-name" style="display:none;">Proje: -</span>
+    <span id="projectNameLabel" class="chip" style="display:none;"></span>
 
     <div class="spacer"></div>
 
@@ -1276,7 +1276,7 @@
     if (state.projectInfo && (state.projectInfo.name || state.projectInfo.contractor)) {
       if (state.projectInfo.name) {
         const pName = document.createElement('p');
-        pName.textContent = 'Proje: ' + state.projectInfo.name;
+        pName.textContent = state.projectInfo.name;
         secPlan.appendChild(pName);
       }
       if (state.projectInfo.contractor) {
@@ -1606,7 +1606,7 @@
       projectNameLabel.textContent = '';
     } else {
       projectNameLabel.style.display = 'inline-flex';
-      projectNameLabel.textContent = 'Proje: ' + name;
+      projectNameLabel.textContent = name;
     }
   }
 
