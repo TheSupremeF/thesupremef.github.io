@@ -1028,6 +1028,10 @@
     secEdit.appendChild(hint);
 
     sideBody.appendChild(secEdit);
+    
+    if (typeof ns.updateWorkViewStats === 'function') {
+      ns.updateWorkViewStats();
+    }
   };
 
   ns.updateModeToggleUI = function() {

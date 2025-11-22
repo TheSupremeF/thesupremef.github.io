@@ -49,6 +49,12 @@ header img.logo {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+#workViewStats {
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .mode-toggle {
   display: inline-flex;
   border-radius: 999px;

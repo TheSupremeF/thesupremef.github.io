@@ -33,6 +33,7 @@
       summaryBtn: document.getElementById('summaryBtn'),
       lastExportLabel: document.getElementById('lastExportLabel'),
       workViewSelect: document.getElementById('workViewSelect'),
+      workViewStats: document.getElementById('workViewStats'),
       aboutBtn: document.getElementById('aboutBtn'),
       aboutOverlay: document.getElementById('aboutOverlay'),
       passwordSettingsBtn: document.getElementById('passwordSettingsBtn'),
@@ -89,7 +90,41 @@
       ns.state.highlightWorkTypeId = val === '' ? null : val;
       ns.state.showSummary = false;
       ns.renderHotspots();
+      updateWorkViewStats();
     });
+  }
+
+  function updateWorkViewStats() {
+    const { workViewSelect, workViewStats } = ns.dom;
+    if (!workViewSelect || !workViewStats) return;
+    
+    const selectedWorkId = workViewSelect.value || '';
+    if (selectedWorkId === '') {
+      workViewStats.style.display = 'none';
+      return;
+    }
+    
+    const { hotspots } = ns.state;
+    let completed = 0;
+    let inProgress = 0;
+    let notStarted = 0;
+    
+    hotspots.forEach(h => {
+      const work = h.works && h.works[selectedWorkId];
+      if (!work) return;
+      
+      if (work.status === 'tamamlandi') completed++;
+      else if (work.status === 'devam_ediyor') inProgress++;
+      else if (work.status === 'baslamadi') notStarted++;
+    });
+    
+    const parts = [];
+    if (completed > 0) parts.push(`✓ ${completed} blok tamamlandı`);
+    if (inProgress > 0) parts.push(`◐ ${inProgress} devam ediyor`);
+    if (notStarted > 0) parts.push(`○ ${notStarted} başlamadı`);
+    
+    workViewStats.textContent = parts.length > 0 ? parts.join(' / ') : 'Blok yok';
+    workViewStats.style.display = 'inline-block';
   }
 
   function wireOverlays() {
@@ -1626,6 +1661,9 @@
 
     if (typeof ns.resetHistory === 'function') ns.resetHistory();
   }
+  
+  // Export updateWorkViewStats to namespace
+  ns.updateWorkViewStats = updateWorkViewStats;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
