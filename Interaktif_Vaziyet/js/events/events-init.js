@@ -23,6 +23,8 @@
       panModeBtn: document.getElementById('panModeBtn'),
       labelsBtn: document.getElementById('labelsBtn'),
       summaryBtn: document.getElementById('summaryBtn'),
+      readyBtn: document.getElementById('readyBtn'),
+      issuesBtn: document.getElementById('issuesBtn'),
       lastExportLabel: document.getElementById('lastExportLabel'),
       workViewSelect: document.getElementById('workViewSelect'),
       workViewStats: document.getElementById('workViewStats'),
@@ -99,7 +101,9 @@
     const { hotspots } = ns.state;
     let completed = 0;
     let inProgress = 0;
+    let ready = 0;
     let notStarted = 0;
+    let noData = 0;
     
     hotspots.forEach(h => {
       const work = h.works && h.works[selectedWorkId];
@@ -107,16 +111,48 @@
       
       if (work.status === 'tamamlandi') completed++;
       else if (work.status === 'devam_ediyor') inProgress++;
+      else if (work.status === 'baslayabilir') ready++;
       else if (work.status === 'baslamadi') notStarted++;
+      else if (work.status === 'veri_girilmedi') noData++;
     });
     
-    const parts = [];
-    if (completed > 0) parts.push(`✓ ${completed} blok tamamlandı`);
-    if (inProgress > 0) parts.push(`◐ ${inProgress} devam ediyor`);
-    if (notStarted > 0) parts.push(`○ ${notStarted} başlamadı`);
+    // Pill'leri oluştur
+    workViewStats.innerHTML = '';
+    workViewStats.style.display = 'inline-flex';
+    workViewStats.style.gap = '4px';
+    workViewStats.style.alignItems = 'center';
     
-    workViewStats.textContent = parts.length > 0 ? parts.join(' / ') : 'Blok yok';
-    workViewStats.style.display = 'inline-block';
+    const statItems = [
+      { count: completed, label: 'Tamamlandı', color: '#16a34a', bg: 'rgba(22, 163, 74, 0.15)' },
+      { count: inProgress, label: 'Devam Ediyor', color: '#eab308', bg: 'rgba(234, 179, 8, 0.15)' },
+      { count: ready, label: 'Başlayabilir', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.15)' },
+      { count: notStarted, label: 'Başlamadı', color: '#dc2626', bg: 'rgba(220, 38, 38, 0.15)' },
+      { count: noData, label: 'Veri Girilmedi', color: '#6b7280', bg: 'rgba(107, 114, 128, 0.15)' }
+    ];
+    
+    statItems.forEach(item => {
+      if (item.count === 0) return;
+      
+      const pill = document.createElement('span');
+      pill.style.display = 'inline-flex';
+      pill.style.alignItems = 'center';
+      pill.style.gap = '4px';
+      pill.style.padding = '2px 8px';
+      pill.style.borderRadius = '999px';
+      pill.style.fontSize = '11px';
+      pill.style.fontWeight = '500';
+      pill.style.border = `1px solid ${item.color}`;
+      pill.style.color = item.color;
+      pill.style.background = item.bg;
+      pill.style.whiteSpace = 'nowrap';
+      
+      pill.textContent = `${item.count} ${item.label}`;
+      workViewStats.appendChild(pill);
+    });
+    
+    if (workViewStats.children.length === 0) {
+      workViewStats.style.display = 'none';
+    }
   }
 
 
@@ -139,7 +175,16 @@
       asideBackdrop.addEventListener('click', () => {
         ns.state.selectedIds.clear();
         ns.state.showSummary = false;
+        ns.state.showReadyPanel = false;
+        ns.state.showIssuesPanel = false;
         ns.state.sidePanelVisible = false;
+        
+        // Butonları untoggle et
+        const { summaryBtn, readyBtn, issuesBtn } = ns.dom;
+        if (summaryBtn) summaryBtn.classList.remove('toggle-active');
+        if (readyBtn) readyBtn.classList.remove('toggle-active');
+        if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+        
         ns.renderHotspots();
         ns.renderSidePanel();
       });

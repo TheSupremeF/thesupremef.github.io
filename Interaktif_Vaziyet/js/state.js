@@ -15,6 +15,8 @@
     panMode: false,
     showLabels: false,
     showSummary: false,
+    showReadyPanel: false,
+    showIssuesPanel: false,
     sidePanelVisible: false,
     highlightWorkTypeId: null,
     lastExportAt: null,
@@ -26,7 +28,9 @@
   };
 
   ns.STATUS_OPTIONS = [
+    { value: 'veri_girilmedi', label: 'Veri Girilmedi' },
     { value: 'baslamadi', label: 'Başlamadı' },
+    { value: 'baslayabilir', label: 'Başlayabilir' },
     { value: 'devam_ediyor', label: 'Devam Ediyor' },
     { value: 'tamamlandi', label: 'Tamamlandı' }
   ];
@@ -36,7 +40,9 @@
     ALL_WORK_ITEMS.forEach(w => {
       const existing = existingWorks ? existingWorks[w.id] : null;
       works[w.id] = {
-        status: existing ? (existing.status || 'baslamadi') : 'baslamadi',
+        status: existing ? (existing.status || 'veri_girilmedi') : 'veri_girilmedi',
+        startDate: existing ? (existing.startDate || '') : '',
+        endDate: existing ? (existing.endDate || '') : '',
         workers: existing && typeof existing.workers === 'number' ? existing.workers : 0,
         subcontractor: existing && typeof existing.subcontractor === 'string' ? existing.subcontractor : ''
       };
@@ -77,6 +83,8 @@
     ns.state.hotspots.push(hotspot);
     ns.state.selectedIds = new Set([id]);
     ns.state.showSummary = false;
+    ns.state.showReadyPanel = false;
+    ns.state.showIssuesPanel = false;
     ns.state.sidePanelVisible = true;
 
     if (typeof ns.pushHistory === 'function') {
@@ -120,7 +128,9 @@
     ALL_WORK_ITEMS.forEach(w => {
       const origItem = original.works ? original.works[w.id] : null;
       clone.works[w.id] = {
-        status: origItem ? (origItem.status || 'baslamadi') : 'baslamadi',
+        status: origItem ? (origItem.status || 'veri_girilmedi') : 'veri_girilmedi',
+        startDate: origItem ? (origItem.startDate || '') : '',
+        endDate: origItem ? (origItem.endDate || '') : '',
         workers: origItem && typeof origItem.workers === 'number' ? origItem.workers : 0,
         subcontractor: origItem && typeof origItem.subcontractor === 'string' ? origItem.subcontractor : ''
       };
@@ -147,14 +157,18 @@
   ns.workStatusClass = function(status) {
     if (status === 'tamamlandi') return 'green';
     if (status === 'devam_ediyor') return 'yellow';
+    if (status === 'baslayabilir') return 'blue';
     if (status === 'baslamadi') return 'red';
+    if (status === 'veri_girilmedi') return 'gray';
     return '';
   };
 
   ns.workStatusIcon = function(status) {
     if (status === 'tamamlandi') return '✓';
     if (status === 'devam_ediyor') return '◐';
+    if (status === 'baslayabilir') return '▷';
     if (status === 'baslamadi') return '○';
+    if (status === 'veri_girilmedi') return '−';
     return '?';
   };
 

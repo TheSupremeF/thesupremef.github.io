@@ -26,13 +26,17 @@
       if (ns.state.highlightWorkTypeId) {
         const works = h.works || {};
         const workItem = works[ns.state.highlightWorkTypeId];
-        const status = workItem ? (workItem.status || 'baslamadi') : 'baslamadi';
+        const status = workItem ? (workItem.status || 'veri_girilmedi') : 'veri_girilmedi';
         if (status === 'tamamlandi') {
           fillColor = '#22c55e';
         } else if (status === 'devam_ediyor') {
           fillColor = '#eab308';
-        } else {
+        } else if (status === 'baslayabilir') {
+          fillColor = '#3b82f6';
+        } else if (status === 'baslamadi') {
           fillColor = '#ef4444';
+        } else {
+          fillColor = '#6b7280';
         }
         fillOpacity = 0.2;
         borderColorHex = fillColor;

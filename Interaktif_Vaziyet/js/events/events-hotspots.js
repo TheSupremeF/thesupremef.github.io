@@ -19,8 +19,17 @@
           !e.target.closest('path')) {
         ns.state.selectedIds.clear();
         ns.state.showSummary = false;
+        ns.state.showReadyPanel = false;
+        ns.state.showIssuesPanel = false;
         ns.state.sidePanelVisible = false;
         selectedDrawing = null;
+        
+        // Butonları untoggle et
+        const { summaryBtn, readyBtn, issuesBtn } = ns.dom;
+        if (summaryBtn) summaryBtn.classList.remove('toggle-active');
+        if (readyBtn) readyBtn.classList.remove('toggle-active');
+        if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+        
         ns.renderHotspots();
         ns.renderSidePanel();
       }
@@ -333,7 +342,16 @@
         const id = hotspotEl.dataset.id;
         ns.state.selectedIds = new Set([id]);
         ns.state.showSummary = false;
+        ns.state.showReadyPanel = false;
+        ns.state.showIssuesPanel = false;
         ns.state.sidePanelVisible = true;
+        
+        // Butonları untoggle et
+        const { summaryBtn, readyBtn, issuesBtn } = ns.dom;
+        if (summaryBtn) summaryBtn.classList.remove('toggle-active');
+        if (readyBtn) readyBtn.classList.remove('toggle-active');
+        if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+        
         ns.renderHotspots();
         ns.renderSidePanel();
         return;
@@ -372,7 +390,16 @@
         ns.state.selectedIds = new Set([id]);
       }
       ns.state.showSummary = false;
+      ns.state.showReadyPanel = false;
+      ns.state.showIssuesPanel = false;
       ns.state.sidePanelVisible = true;
+      
+      // Butonları untoggle et
+      const { summaryBtn, readyBtn, issuesBtn } = ns.dom;
+      if (summaryBtn) summaryBtn.classList.remove('toggle-active');
+      if (readyBtn) readyBtn.classList.remove('toggle-active');
+      if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+      
       ns.renderHotspots();
       ns.renderSidePanel();
 
@@ -398,6 +425,8 @@
             ns.state.hotspots.push(...clones);
             ns.state.selectedIds = new Set(clones.map(c => c.id));
             ns.state.showSummary = false;
+            ns.state.showReadyPanel = false;
+            ns.state.showIssuesPanel = false;
             ns.state.sidePanelVisible = true;
             ns.renderHotspots();
             ns.renderSidePanel();

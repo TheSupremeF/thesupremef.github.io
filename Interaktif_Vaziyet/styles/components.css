@@ -131,6 +131,13 @@
   color: #facc15;
 }
 
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background: #4b5563;
+  margin: 0 4px;
+}
+
 .toolbar .icon-button {
   display: inline-flex;
   align-items: center;
@@ -403,6 +410,16 @@
 .status-pill.red { 
   border-color: #dc2626; 
   color: #fecaca; 
+}
+
+.status-pill.blue { 
+  border-color: #2563eb; 
+  color: #bfdbfe; 
+}
+
+.status-pill.gray { 
+  border-color: #6b7280; 
+  color: #d1d5db; 
 }
 
 /* Hotspot List Items */

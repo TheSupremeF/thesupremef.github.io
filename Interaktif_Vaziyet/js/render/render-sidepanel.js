@@ -22,6 +22,16 @@
       return;
     }
 
+    if (ns.state.showReadyPanel) {
+      ns.renderReadyWorksPanel();
+      return;
+    }
+
+    if (ns.state.showIssuesPanel) {
+      ns.renderAllIssuesPanel();
+      return;
+    }
+
     if (!ns.state.selectedIds.size) return;
 
     const selectedArray = Array.from(ns.state.selectedIds);
@@ -120,7 +130,7 @@
           let groupHasData = false;
           group.items.forEach(w => {
             const item = hs.works[w.id];
-            if (item && item.status && item.status !== 'baslamadi') {
+            if (item && item.status && item.status !== 'veri_girilmedi') {
               groupHasData = true;
             }
           });
@@ -136,7 +146,7 @@
 
           group.items.forEach(w => {
             const item = hs.works[w.id];
-            if (!item || !item.status || item.status === 'baslamadi') return;
+            if (!item || !item.status || item.status === 'veri_girilmedi') return;
 
             const pill = document.createElement('div');
             pill.className = 'status-pill';
@@ -171,10 +181,36 @@
 
             infoWrapper.appendChild(topRow);
 
-            if (item.subcontractor && item.subcontractor.trim()) {
+            // Başlama ve tamamlanma tarihlerini works objesinden al
+            const startDate = item.startDate || '';
+            const endDate = item.endDate || '';
+
+            // Alt yüklenici ve tarih bilgilerini göster
+            const hasSubcontractor = item.subcontractor && item.subcontractor.trim();
+            const hasDates = startDate || endDate;
+
+            if (hasSubcontractor || hasDates) {
               const bottomRow = document.createElement('div');
               bottomRow.className = 'bottom-row';
-              bottomRow.textContent = item.subcontractor.trim();
+              
+              const parts = [];
+              if (hasSubcontractor) {
+                parts.push(item.subcontractor.trim());
+              }
+              
+              if (startDate && endDate) {
+                const startFormatted = startDate.split('-').reverse().join('.');
+                const endFormatted = endDate.split('-').reverse().join('.');
+                parts.push(`📅 ${startFormatted} → ${endFormatted}`);
+              } else if (startDate) {
+                const startFormatted = startDate.split('-').reverse().join('.');
+                parts.push(`📅 Başlangıç: ${startFormatted}`);
+              } else if (endDate) {
+                const endFormatted = endDate.split('-').reverse().join('.');
+                parts.push(`📅 Tamamlanma: ${endFormatted}`);
+              }
+              
+              bottomRow.textContent = parts.join(' · ');
               infoWrapper.appendChild(bottomRow);
             }
 
@@ -247,11 +283,31 @@
           issueMeta.style.color = '#9ca3af';
           issueMeta.style.display = 'flex';
           issueMeta.style.gap = '8px';
+          issueMeta.style.flexWrap = 'wrap';
           
-          if (issue.date) {
+          // Oluşturulma tarihi/saati
+          if (issue.createdAt) {
+            const dateSpan = document.createElement('span');
+            const createdDate = new Date(issue.createdAt);
+            const dateStr = createdDate.toLocaleDateString('tr-TR');
+            const timeStr = createdDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            dateSpan.textContent = `📅 ${dateStr} ${timeStr}`;
+            issueMeta.appendChild(dateSpan);
+          } else if (issue.date) {
+            // Eski format desteği
             const dateSpan = document.createElement('span');
             dateSpan.textContent = `📅 ${issue.date}`;
             issueMeta.appendChild(dateSpan);
+          }
+
+          // İmalat türü
+          if (issue.workTypeId) {
+            const workTypeSpan = document.createElement('span');
+            const workItem = ALL_WORK_ITEMS.find(w => w.id === issue.workTypeId);
+            if (workItem) {
+              workTypeSpan.textContent = `🔧 ${workItem.label}`;
+              issueMeta.appendChild(workTypeSpan);
+            }
           }
           
           if (issue.priority) {
@@ -559,7 +615,7 @@
       group.items.forEach(w => {
         let record = hs.dailyRecords.find(r => r.date === selectedDate && r.workTypeId === w.id);
         if (!record) {
-          record = { date: selectedDate, workTypeId: w.id, workers: 0, status: 'baslamadi' };
+          record = { date: selectedDate, workTypeId: w.id, workers: 0, status: 'veri_girilmedi' };
           hs.dailyRecords.push(record);
         }
 
@@ -620,6 +676,50 @@
         });
         row.appendChild(subInput);
 
+        // Başlama ve Bitiş Tarihi satırı
+        const datesRow = document.createElement('div');
+        datesRow.style.display = 'flex';
+        datesRow.style.gap = '8px';
+        datesRow.style.marginTop = '4px';
+
+        const startDateWrapper = document.createElement('div');
+        startDateWrapper.style.flex = '1';
+        const startDateLabel = document.createElement('label');
+        startDateLabel.textContent = 'Başlama';
+        startDateLabel.style.fontSize = '10px';
+        startDateLabel.style.color = '#9ca3af';
+        startDateLabel.style.display = 'block';
+        startDateWrapper.appendChild(startDateLabel);
+        const startDateInput = document.createElement('input');
+        startDateInput.type = 'date';
+        startDateInput.value = item.startDate || '';
+        startDateInput.style.width = '100%';
+        startDateInput.addEventListener('change', () => {
+          hs.works[w.id].startDate = startDateInput.value;
+        });
+        startDateWrapper.appendChild(startDateInput);
+        datesRow.appendChild(startDateWrapper);
+
+        const endDateWrapper = document.createElement('div');
+        endDateWrapper.style.flex = '1';
+        const endDateLabel = document.createElement('label');
+        endDateLabel.textContent = 'Bitiş';
+        endDateLabel.style.fontSize = '10px';
+        endDateLabel.style.color = '#9ca3af';
+        endDateLabel.style.display = 'block';
+        endDateWrapper.appendChild(endDateLabel);
+        const endDateInput = document.createElement('input');
+        endDateInput.type = 'date';
+        endDateInput.value = item.endDate || '';
+        endDateInput.style.width = '100%';
+        endDateInput.addEventListener('change', () => {
+          hs.works[w.id].endDate = endDateInput.value;
+        });
+        endDateWrapper.appendChild(endDateInput);
+        datesRow.appendChild(endDateWrapper);
+
+        row.appendChild(datesRow);
+
         secWorks.appendChild(row);
       });
     });
@@ -653,11 +753,13 @@
     addIssueBtn.style.padding = '4px 8px';
     addIssueBtn.addEventListener('click', () => {
       if (!hs.issues) hs.issues = [];
+      const now = new Date();
       hs.issues.push({
         id: 'issue-' + Date.now(),
         title: 'Yeni Sorun',
         description: '',
-        date: new Date().toISOString().split('T')[0],
+        createdAt: now.toISOString(),
+        workTypeId: '',
         status: 'open',
         priority: 'medium',
         photos: []
@@ -708,6 +810,19 @@
         });
         issueCard.appendChild(titleInput);
 
+        // Oluşturulma tarihi/saati (sadece gösterim)
+        if (issue.createdAt) {
+          const createdAtDiv = document.createElement('div');
+          createdAtDiv.style.fontSize = '10px';
+          createdAtDiv.style.color = '#9ca3af';
+          createdAtDiv.style.marginBottom = '6px';
+          const createdDate = new Date(issue.createdAt);
+          const dateStr = createdDate.toLocaleDateString('tr-TR');
+          const timeStr = createdDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+          createdAtDiv.textContent = `📅 Oluşturulma: ${dateStr} ${timeStr}`;
+          issueCard.appendChild(createdAtDiv);
+        }
+
         // Açıklama
         const descLabel = document.createElement('label');
         descLabel.textContent = 'Açıklama';
@@ -729,32 +844,48 @@
         });
         issueCard.appendChild(descInput);
 
-        // Tarih, Durum, Öncelik satırı
+        // İmalat Türü, Durum, Öncelik satırı
         const metaRow = document.createElement('div');
         metaRow.style.display = 'grid';
         metaRow.style.gridTemplateColumns = '1fr 1fr 1fr';
         metaRow.style.gap = '6px';
         metaRow.style.marginBottom = '6px';
 
-        // Tarih
-        const dateDiv = document.createElement('div');
-        const dateLabel = document.createElement('label');
-        dateLabel.textContent = 'Tarih';
-        dateLabel.style.fontSize = '10px';
-        dateLabel.style.fontWeight = '600';
-        dateLabel.style.color = '#d1d5db';
-        dateLabel.style.display = 'block';
-        dateLabel.style.marginBottom = '2px';
-        dateDiv.appendChild(dateLabel);
-        const dateInput = document.createElement('input');
-        dateInput.type = 'date';
-        dateInput.value = issue.date || new Date().toISOString().split('T')[0];
-        dateInput.style.width = '100%';
-        dateInput.addEventListener('change', () => {
-          issue.date = dateInput.value;
+        // İmalat Türü
+        const workTypeDiv = document.createElement('div');
+        const workTypeLabel = document.createElement('label');
+        workTypeLabel.textContent = 'İmalat Türü';
+        workTypeLabel.style.fontSize = '10px';
+        workTypeLabel.style.fontWeight = '600';
+        workTypeLabel.style.color = '#d1d5db';
+        workTypeLabel.style.display = 'block';
+        workTypeLabel.style.marginBottom = '2px';
+        workTypeDiv.appendChild(workTypeLabel);
+        const workTypeSelect = document.createElement('select');
+        workTypeSelect.style.width = '100%';
+        // Boş seçenek
+        const emptyOpt = document.createElement('option');
+        emptyOpt.value = '';
+        emptyOpt.textContent = '-- Seçiniz --';
+        workTypeSelect.appendChild(emptyOpt);
+        // İmalat türlerini grupla
+        WORK_GROUPS.forEach(group => {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = group.label;
+          group.items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.label;
+            optgroup.appendChild(opt);
+          });
+          workTypeSelect.appendChild(optgroup);
         });
-        dateDiv.appendChild(dateInput);
-        metaRow.appendChild(dateDiv);
+        workTypeSelect.value = issue.workTypeId || '';
+        workTypeSelect.addEventListener('change', () => {
+          issue.workTypeId = workTypeSelect.value;
+        });
+        workTypeDiv.appendChild(workTypeSelect);
+        metaRow.appendChild(workTypeDiv);
 
         // Durum
         const statusDiv = document.createElement('div');
@@ -1012,7 +1143,9 @@
       
       ALL_WORK_ITEMS.forEach(w => {
         hs.works[w.id] = {
-          status: 'baslamadi',
+          status: 'veri_girilmedi',
+          startDate: '',
+          endDate: '',
           workers: 0,
           subcontractor: ''
         };
@@ -1069,5 +1202,409 @@
     if (typeof ns.updateWorkViewStats === 'function') {
       ns.updateWorkViewStats();
     }
+  };
+
+  // Başlayabilir İmalatlar Paneli
+  ns.renderReadyWorksPanel = function() {
+    const { sideBody } = ns.dom || {};
+    if (!sideBody) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'side-section';
+
+    // Başlık
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = '12px';
+
+    const h = document.createElement('h3');
+    h.style.margin = '0';
+    h.style.color = '#3b82f6';
+    h.textContent = '▷ Başlayabilir İmalatlar';
+    header.appendChild(h);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.border = 'none';
+    closeBtn.style.color = '#9ca3af';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.fontSize = '16px';
+    closeBtn.addEventListener('click', () => {
+      ns.state.showReadyPanel = false;
+      ns.state.sidePanelVisible = false;
+      
+      // Butonu untoggle et
+      const { readyBtn } = ns.dom;
+      if (readyBtn) readyBtn.classList.remove('toggle-active');
+      
+      ns.renderSidePanel();
+    });
+    header.appendChild(closeBtn);
+    sec.appendChild(header);
+
+    // Başlayabilir imalatları topla
+    const readyItems = [];
+    ns.state.hotspots.forEach(hs => {
+      if (!hs.works) return;
+      ALL_WORK_ITEMS.forEach(w => {
+        const work = hs.works[w.id];
+        if (work && work.status === 'baslayabilir') {
+          readyItems.push({
+            hotspot: hs,
+            workItem: w,
+            work: work
+          });
+        }
+      });
+    });
+
+    if (readyItems.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.textAlign = 'center';
+      empty.style.padding = '20px';
+      empty.style.color = '#6b7280';
+      empty.textContent = 'Başlayabilir durumda imalat bulunmuyor.';
+      sec.appendChild(empty);
+    } else {
+      // Sayaç
+      const countDiv = document.createElement('div');
+      countDiv.style.fontSize = '11px';
+      countDiv.style.color = '#9ca3af';
+      countDiv.style.marginBottom = '10px';
+      countDiv.textContent = `Toplam ${readyItems.length} imalat başlayabilir durumda`;
+      sec.appendChild(countDiv);
+
+      // İmalat kartları
+      readyItems.forEach(item => {
+        const card = document.createElement('div');
+        card.style.background = '#1f2937';
+        card.style.border = '1px solid #3b82f6';
+        card.style.borderRadius = '6px';
+        card.style.padding = '10px';
+        card.style.marginBottom = '8px';
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+          ns.state.showReadyPanel = false;
+          ns.state.selectedIds = new Set([item.hotspot.id]);
+          ns.state.highlightWorkTypeId = item.workItem.id;
+          
+          // Butonu untoggle et
+          const { readyBtn } = ns.dom;
+          if (readyBtn) readyBtn.classList.remove('toggle-active');
+          
+          ns.renderHotspots();
+          ns.renderSidePanel();
+        });
+
+        // Blok adı
+        const blockName = document.createElement('div');
+        blockName.style.fontWeight = '600';
+        blockName.style.fontSize = '12px';
+        blockName.style.color = '#e5e7eb';
+        blockName.style.marginBottom = '4px';
+        blockName.textContent = ns.buildHotspotLabel(item.hotspot);
+        card.appendChild(blockName);
+
+        // İmalat adı
+        const workName = document.createElement('div');
+        workName.style.fontSize = '11px';
+        workName.style.color = '#3b82f6';
+        workName.style.display = 'flex';
+        workName.style.alignItems = 'center';
+        workName.style.gap = '4px';
+        workName.innerHTML = `<span style="font-size: 14px;">▷</span> ${item.workItem.label}`;
+        card.appendChild(workName);
+
+        // Alt yüklenici varsa göster
+        if (item.work.subcontractor && item.work.subcontractor.trim()) {
+          const subDiv = document.createElement('div');
+          subDiv.style.fontSize = '10px';
+          subDiv.style.color = '#9ca3af';
+          subDiv.style.marginTop = '4px';
+          subDiv.textContent = `Alt yüklenici: ${item.work.subcontractor}`;
+          card.appendChild(subDiv);
+        }
+
+        sec.appendChild(card);
+      });
+    }
+
+    sideBody.appendChild(sec);
+  };
+
+  // Tüm İmalat Sorunları Paneli
+  ns.renderAllIssuesPanel = function() {
+    const { sideBody } = ns.dom || {};
+    if (!sideBody) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'side-section';
+
+    // Başlık
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = '12px';
+
+    const h = document.createElement('h3');
+    h.style.margin = '0';
+    h.style.color = '#ef4444';
+    h.textContent = '⚠️ İmalat Sorunları';
+    header.appendChild(h);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.border = 'none';
+    closeBtn.style.color = '#9ca3af';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.fontSize = '16px';
+    closeBtn.addEventListener('click', () => {
+      ns.state.showIssuesPanel = false;
+      ns.state.sidePanelVisible = false;
+      
+      // Butonu untoggle et
+      const { issuesBtn } = ns.dom;
+      if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+      
+      ns.renderSidePanel();
+    });
+    header.appendChild(closeBtn);
+    sec.appendChild(header);
+
+    // Filtre butonları
+    const filterRow = document.createElement('div');
+    filterRow.style.display = 'flex';
+    filterRow.style.gap = '6px';
+    filterRow.style.marginBottom = '10px';
+
+    const filters = [
+      { id: 'all', label: 'Tümü' },
+      { id: 'open', label: 'Açık' },
+      { id: 'closed', label: 'Kapalı' }
+    ];
+
+    let currentFilter = 'all';
+
+    filters.forEach(f => {
+      const btn = document.createElement('button');
+      btn.textContent = f.label;
+      btn.style.fontSize = '11px';
+      btn.style.padding = '4px 10px';
+      btn.style.borderRadius = '999px';
+      btn.style.border = '1px solid #4b5563';
+      btn.style.background = f.id === currentFilter ? '#374151' : 'transparent';
+      btn.style.color = '#e5e7eb';
+      btn.style.cursor = 'pointer';
+      btn.dataset.filter = f.id;
+      btn.addEventListener('click', () => {
+        currentFilter = f.id;
+        filterRow.querySelectorAll('button').forEach(b => {
+          b.style.background = b.dataset.filter === currentFilter ? '#374151' : 'transparent';
+        });
+        renderIssuesList();
+      });
+      filterRow.appendChild(btn);
+    });
+    sec.appendChild(filterRow);
+
+    // Sorun listesi konteyneri
+    const listContainer = document.createElement('div');
+    listContainer.id = 'issuesListContainer';
+    sec.appendChild(listContainer);
+
+    function renderIssuesList() {
+      listContainer.innerHTML = '';
+
+      // Tüm sorunları topla
+      const allIssues = [];
+      ns.state.hotspots.forEach(hs => {
+        if (!hs.issues || hs.issues.length === 0) return;
+        hs.issues.forEach(issue => {
+          allIssues.push({
+            hotspot: hs,
+            issue: issue
+          });
+        });
+      });
+
+      // Filtrele
+      const filteredIssues = allIssues.filter(item => {
+        if (currentFilter === 'all') return true;
+        return item.issue.status === currentFilter;
+      });
+
+      // Tarihe göre sırala (en yeni önce)
+      filteredIssues.sort((a, b) => {
+        const dateA = a.issue.createdAt ? new Date(a.issue.createdAt) : new Date(a.issue.date || 0);
+        const dateB = b.issue.createdAt ? new Date(b.issue.createdAt) : new Date(b.issue.date || 0);
+        return dateB - dateA;
+      });
+
+      if (filteredIssues.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.textAlign = 'center';
+        empty.style.padding = '20px';
+        empty.style.color = '#6b7280';
+        empty.textContent = currentFilter === 'all' 
+          ? 'Henüz imalat sorunu bulunmuyor.' 
+          : `${currentFilter === 'open' ? 'Açık' : 'Kapalı'} sorun bulunmuyor.`;
+        listContainer.appendChild(empty);
+        return;
+      }
+
+      // Sayaçlar
+      const openCount = allIssues.filter(i => i.issue.status === 'open').length;
+      const closedCount = allIssues.filter(i => i.issue.status === 'closed').length;
+
+      const countDiv = document.createElement('div');
+      countDiv.style.fontSize = '11px';
+      countDiv.style.color = '#9ca3af';
+      countDiv.style.marginBottom = '10px';
+      countDiv.style.display = 'flex';
+      countDiv.style.gap = '12px';
+      countDiv.innerHTML = `
+        <span style="color: #ef4444;">● ${openCount} Açık</span>
+        <span style="color: #22c55e;">● ${closedCount} Kapalı</span>
+      `;
+      listContainer.appendChild(countDiv);
+
+      // Sorun kartları
+      filteredIssues.forEach(item => {
+        const card = document.createElement('div');
+        card.style.background = '#1f2937';
+        card.style.border = `1px solid ${item.issue.status === 'open' ? '#dc2626' : '#16a34a'}`;
+        card.style.borderRadius = '6px';
+        card.style.padding = '10px';
+        card.style.marginBottom = '8px';
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+          ns.state.showIssuesPanel = false;
+          ns.state.selectedIds = new Set([item.hotspot.id]);
+          
+          // Butonu untoggle et
+          const { issuesBtn } = ns.dom;
+          if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+          
+          ns.renderHotspots();
+          ns.renderSidePanel();
+        });
+
+        // Üst kısım - başlık ve durum
+        const topRow = document.createElement('div');
+        topRow.style.display = 'flex';
+        topRow.style.justifyContent = 'space-between';
+        topRow.style.alignItems = 'flex-start';
+        topRow.style.marginBottom = '6px';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.style.flex = '1';
+
+        const issueTitle = document.createElement('div');
+        issueTitle.style.fontWeight = '600';
+        issueTitle.style.fontSize = '12px';
+        issueTitle.style.color = '#e5e7eb';
+        issueTitle.textContent = item.issue.title || 'Sorun';
+        titleDiv.appendChild(issueTitle);
+
+        const blockName = document.createElement('div');
+        blockName.style.fontSize = '10px';
+        blockName.style.color = '#9ca3af';
+        blockName.style.marginTop = '2px';
+        blockName.textContent = ns.buildHotspotLabel(item.hotspot);
+        titleDiv.appendChild(blockName);
+
+        topRow.appendChild(titleDiv);
+
+        // Durum badge
+        const statusBadge = document.createElement('span');
+        statusBadge.style.fontSize = '10px';
+        statusBadge.style.padding = '2px 6px';
+        statusBadge.style.borderRadius = '3px';
+        statusBadge.style.fontWeight = '500';
+        if (item.issue.status === 'open') {
+          statusBadge.style.background = '#dc2626';
+          statusBadge.style.color = '#fff';
+          statusBadge.textContent = 'Açık';
+        } else {
+          statusBadge.style.background = '#16a34a';
+          statusBadge.style.color = '#fff';
+          statusBadge.textContent = 'Kapalı';
+        }
+        topRow.appendChild(statusBadge);
+
+        card.appendChild(topRow);
+
+        // Açıklama
+        if (item.issue.description && item.issue.description.trim()) {
+          const descDiv = document.createElement('div');
+          descDiv.style.fontSize = '11px';
+          descDiv.style.color = '#d1d5db';
+          descDiv.style.marginBottom = '6px';
+          descDiv.style.overflow = 'hidden';
+          descDiv.style.textOverflow = 'ellipsis';
+          descDiv.style.whiteSpace = 'nowrap';
+          descDiv.textContent = item.issue.description.trim();
+          card.appendChild(descDiv);
+        }
+
+        // Meta bilgiler
+        const metaDiv = document.createElement('div');
+        metaDiv.style.fontSize = '10px';
+        metaDiv.style.color = '#9ca3af';
+        metaDiv.style.display = 'flex';
+        metaDiv.style.gap = '8px';
+        metaDiv.style.flexWrap = 'wrap';
+
+        // Tarih
+        if (item.issue.createdAt) {
+          const createdDate = new Date(item.issue.createdAt);
+          const dateStr = createdDate.toLocaleDateString('tr-TR');
+          const timeStr = createdDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+          const dateSpan = document.createElement('span');
+          dateSpan.textContent = `📅 ${dateStr} ${timeStr}`;
+          metaDiv.appendChild(dateSpan);
+        } else if (item.issue.date) {
+          const dateSpan = document.createElement('span');
+          dateSpan.textContent = `📅 ${item.issue.date}`;
+          metaDiv.appendChild(dateSpan);
+        }
+
+        // İmalat türü
+        if (item.issue.workTypeId) {
+          const workItem = ALL_WORK_ITEMS.find(w => w.id === item.issue.workTypeId);
+          if (workItem) {
+            const workSpan = document.createElement('span');
+            workSpan.textContent = `🔧 ${workItem.label}`;
+            metaDiv.appendChild(workSpan);
+          }
+        }
+
+        // Öncelik
+        if (item.issue.priority) {
+          const prioritySpan = document.createElement('span');
+          const priorityEmoji = item.issue.priority === 'high' ? '🔴' : item.issue.priority === 'medium' ? '🟡' : '🟢';
+          prioritySpan.textContent = priorityEmoji;
+          metaDiv.appendChild(prioritySpan);
+        }
+
+        // Fotoğraf sayısı
+        if (item.issue.photos && item.issue.photos.length > 0) {
+          const photoSpan = document.createElement('span');
+          photoSpan.textContent = `📷 ${item.issue.photos.length}`;
+          metaDiv.appendChild(photoSpan);
+        }
+
+        card.appendChild(metaDiv);
+        listContainer.appendChild(card);
+      });
+    }
+
+    renderIssuesList();
+    sideBody.appendChild(sec);
   };
 })(window.EPP = window.EPP || {});

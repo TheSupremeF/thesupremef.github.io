@@ -2,7 +2,7 @@
   const { ALL_WORK_ITEMS } = ns;
 
   function wireToolbarButtons() {
-    const { panModeBtn, labelsBtn, summaryBtn, resetViewBtn } = ns.dom;
+    const { panModeBtn, labelsBtn, summaryBtn, readyBtn, issuesBtn, resetViewBtn } = ns.dom;
     const { addBlockBtn, drawLineBtn, drawCurveBtn, addTextBtn } = ns.dom;
 
     panModeBtn.addEventListener('click', () => {
@@ -18,8 +18,40 @@
 
     summaryBtn.addEventListener('click', () => {
       ns.state.showSummary = !ns.state.showSummary;
+      ns.state.showReadyPanel = false;
+      ns.state.showIssuesPanel = false;
       summaryBtn.classList.toggle('toggle-active', ns.state.showSummary);
+      readyBtn.classList.remove('toggle-active');
+      issuesBtn.classList.remove('toggle-active');
       if (ns.state.showSummary) {
+        ns.state.selectedIds.clear();
+        ns.state.sidePanelVisible = true;
+      }
+      ns.renderSidePanel();
+    });
+
+    readyBtn.addEventListener('click', () => {
+      ns.state.showReadyPanel = !ns.state.showReadyPanel;
+      ns.state.showSummary = false;
+      ns.state.showIssuesPanel = false;
+      readyBtn.classList.toggle('toggle-active', ns.state.showReadyPanel);
+      summaryBtn.classList.remove('toggle-active');
+      issuesBtn.classList.remove('toggle-active');
+      if (ns.state.showReadyPanel) {
+        ns.state.selectedIds.clear();
+        ns.state.sidePanelVisible = true;
+      }
+      ns.renderSidePanel();
+    });
+
+    issuesBtn.addEventListener('click', () => {
+      ns.state.showIssuesPanel = !ns.state.showIssuesPanel;
+      ns.state.showSummary = false;
+      ns.state.showReadyPanel = false;
+      issuesBtn.classList.toggle('toggle-active', ns.state.showIssuesPanel);
+      summaryBtn.classList.remove('toggle-active');
+      readyBtn.classList.remove('toggle-active');
+      if (ns.state.showIssuesPanel) {
         ns.state.selectedIds.clear();
         ns.state.sidePanelVisible = true;
       }
@@ -146,7 +178,9 @@
       
       ALL_WORK_ITEMS.forEach(w => {
         hs.works[w.id] = {
-          status: 'baslamadi',
+          status: 'veri_girilmedi',
+          startDate: '',
+          endDate: '',
           workers: 0,
           subcontractor: ''
         };

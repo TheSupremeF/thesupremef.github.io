@@ -51,8 +51,10 @@
   ns.ALL_WORK_ITEMS = ns.WORK_GROUPS.flatMap(group => group.items);
 
   ns.STATUS_OPTIONS = [
+    { value: 'veri_girilmedi', label: 'Veri Girilmedi' },
     { value: 'baslamadi', label: 'Başlamadı' },
-    { value: 'devam_ediyor', label: 'Devam ediyor' },
+    { value: 'baslayabilir', label: 'Başlayabilir' },
+    { value: 'devam_ediyor', label: 'Devam Ediyor' },
     { value: 'tamamlandi', label: 'Tamamlandı' }
   ];
 })(window.EPP = window.EPP || {});
