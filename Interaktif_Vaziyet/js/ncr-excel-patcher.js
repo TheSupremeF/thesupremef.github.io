@@ -27,7 +27,7 @@ class NCRExcelPatcher {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         
-        const runs = []; // Array of {text, bold, italic, fontSize}
+        const runs = []; // Array of {text, bold, italic, fontSize, fontFamily}
         
         // Process nodes recursively
         const processNode = (node, inheritedStyles = {}) => {
@@ -38,7 +38,8 @@ class NCRExcelPatcher {
                         text: text,
                         bold: inheritedStyles.bold || false,
                         italic: inheritedStyles.italic || false,
-                        fontSize: inheritedStyles.fontSize || '11'
+                        fontSize: inheritedStyles.fontSize || '11',
+                        fontFamily: 'Times New Roman' // Always use Times New Roman
                     });
                 }
             } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -66,21 +67,21 @@ class NCRExcelPatcher {
                 
                 // Handle line breaks
                 if (tag === 'br') {
-                    runs.push({ text: '\n', bold: false, italic: false, fontSize: '11' });
+                    runs.push({ text: '\n', bold: false, italic: false, fontSize: '11', fontFamily: 'Times New Roman' });
                 } else if (tag === 'p' || tag === 'div') {
                     Array.from(node.childNodes).forEach(child => processNode(child, newStyles));
                     // Add newline after block elements (but not if last element)
                     if (node.nextSibling) {
-                        runs.push({ text: '\n', bold: false, italic: false, fontSize: '11' });
+                        runs.push({ text: '\n', bold: false, italic: false, fontSize: '11', fontFamily: 'Times New Roman' });
                     }
                 } else if (tag === 'ul' || tag === 'ol') {
                     let index = 1;
                     Array.from(node.children).forEach(li => {
                         if (li.tagName.toLowerCase() === 'li') {
                             const prefix = tag === 'ul' ? '• ' : `${index}. `;
-                            runs.push({ text: prefix, bold: false, italic: false, fontSize: '11' });
+                            runs.push({ text: prefix, bold: false, italic: false, fontSize: '11', fontFamily: 'Times New Roman' });
                             Array.from(li.childNodes).forEach(child => processNode(child, newStyles));
-                            runs.push({ text: '\n', bold: false, italic: false, fontSize: '11' });
+                            runs.push({ text: '\n', bold: false, italic: false, fontSize: '11', fontFamily: 'Times New Roman' });
                             index++;
                         }
                     });
@@ -100,7 +101,8 @@ class NCRExcelPatcher {
             if (last && 
                 last.bold === run.bold && 
                 last.italic === run.italic && 
-                last.fontSize === run.fontSize) {
+                last.fontSize === run.fontSize &&
+                last.fontFamily === run.fontFamily) {
                 last.text += run.text;
             } else {
                 mergedRuns.push({ ...run });
@@ -199,27 +201,32 @@ class NCRExcelPatcher {
         for (let run of richTextRuns) {
             const r = doc.createElementNS(ns, 'r');
             
-            // Add run properties if formatting exists
-            if (run.bold || run.italic || run.fontSize !== '11') {
-                const rPr = doc.createElementNS(ns, 'rPr');
-                
-                if (run.bold) {
-                    const b = doc.createElementNS(ns, 'b');
-                    rPr.appendChild(b);
-                }
-                
-                if (run.italic) {
-                    const i = doc.createElementNS(ns, 'i');
-                    rPr.appendChild(i);
-                }
-                
-                // Font size
-                const sz = doc.createElementNS(ns, 'sz');
-                sz.setAttribute('val', run.fontSize);
-                rPr.appendChild(sz);
-                
-                r.appendChild(rPr);
+            // Always add run properties for font family
+            const rPr = doc.createElementNS(ns, 'rPr');
+            
+            // Font family (Times New Roman)
+            const rFont = doc.createElementNS(ns, 'rFont');
+            rFont.setAttribute('val', run.fontFamily || 'Times New Roman');
+            rPr.appendChild(rFont);
+            
+            // Bold
+            if (run.bold) {
+                const b = doc.createElementNS(ns, 'b');
+                rPr.appendChild(b);
             }
+            
+            // Italic
+            if (run.italic) {
+                const i = doc.createElementNS(ns, 'i');
+                rPr.appendChild(i);
+            }
+            
+            // Font size
+            const sz = doc.createElementNS(ns, 'sz');
+            sz.setAttribute('val', run.fontSize || '11');
+            rPr.appendChild(sz);
+            
+            r.appendChild(rPr);
             
             // Add text
             const t = doc.createElementNS(ns, 't');
@@ -235,6 +242,57 @@ class NCRExcelPatcher {
         }
         
         cell.appendChild(is);
+    }
+    
+    updateCellToRichImage(doc, sheetData, cellRef, vmIndex) {
+        const ns = this.NS.main;
+        
+        // Find cell
+        const cells = sheetData.getElementsByTagNameNS(ns, 'c');
+        let cell = null;
+        let cellParent = null;
+        let nextSibling = null;
+        
+        for (let c of cells) {
+            if (c.getAttribute('r') === cellRef) {
+                cell = c;
+                cellParent = cell.parentNode;
+                nextSibling = cell.nextSibling;
+                break;
+            }
+        }
+        
+        if (!cell) {
+            console.warn(`Cell ${cellRef} not found`);
+            return;
+        }
+        
+        // Preserve existing style
+        const existingStyle = cell.getAttribute('s');
+        
+        // Remove old cell
+        cellParent.removeChild(cell);
+        
+        // Create new cell element with correct attribute order
+        const newCell = doc.createElementNS(ns, 'c');
+        newCell.setAttribute('r', cellRef);
+        if (existingStyle) {
+            newCell.setAttribute('s', existingStyle);
+        }
+        newCell.setAttribute('t', 'e'); // Error type
+        newCell.setAttribute('vm', String(vmIndex)); // Rich value metadata index
+        
+        // Add #VALUE! as cell value
+        const v = doc.createElementNS(ns, 'v');
+        v.textContent = '#VALUE!';
+        newCell.appendChild(v);
+        
+        // Insert new cell back in same position
+        if (nextSibling) {
+            cellParent.insertBefore(newCell, nextSibling);
+        } else {
+            cellParent.appendChild(newCell);
+        }
     }
     
     patchSheetXML(sheetXMLString, ncrData, projectInfo, location) {
@@ -282,16 +340,16 @@ class NCRExcelPatcher {
             this.updateCellValue(doc, sheetData, 'A9', '');
         }
         
-        // A10, B10, C10: Photo labels
-        // Images will be embedded separately in the ZIP
+        // A10, B10, C10: Photo cells with rich value images (Place in cell)
+        // These behave exactly like the image in A2
         if (ncrData.photos && ncrData.photos.length > 0) {
-            this.updateCellValue(doc, sheetData, 'A10', 'Fotoğraf 1');
+            this.updateCellToRichImage(doc, sheetData, 'A10', 4); // vm="4"
         }
         if (ncrData.photos && ncrData.photos.length > 1) {
-            this.updateCellValue(doc, sheetData, 'B10', 'Fotoğraf 2');
+            this.updateCellToRichImage(doc, sheetData, 'B10', 5); // vm="5"
         }
         if (ncrData.photos && ncrData.photos.length > 2) {
-            this.updateCellValue(doc, sheetData, 'C10', 'Fotoğraf 3');
+            this.updateCellToRichImage(doc, sheetData, 'C10', 6); // vm="6"
         }
         
         // B12: Control Engineer Date (formatted)
@@ -334,150 +392,126 @@ class NCRExcelPatcher {
             if (photo && photo.data) {
                 const base64Data = photo.data.split(',')[1];
                 const imageBlob = this.base64ToBlob(base64Data, 'image/jpeg');
-                zip.file(`xl/media/image${i + 1}.jpg`, imageBlob);
+                // Use image4.jpg, image5.jpg, image6.jpg (image1-3 are template images)
+                zip.file(`xl/media/image${i + 4}.jpg`, imageBlob);
             }
         }
         
-        // 2. Create drawing XML with image anchors
-        const drawingXML = this.createDrawingXML(photoCount);
-        zip.file('xl/drawings/drawing1.xml', drawingXML);
+        // 2. Update rich value data (rdrichvalue.xml)
+        await this.updateRichValueData(zip, photoCount);
         
-        // 3. Create drawing relationships
-        const drawingRels = this.createDrawingRels(photoCount);
-        zip.file('xl/drawings/_rels/drawing1.xml.rels', drawingRels);
+        // 3. Update rich value relationships (richValueRel.xml)
+        await this.updateRichValueRel(zip, photoCount);
         
-        // 4. Update worksheet relationships
-        await this.updateWorksheetRels(zip);
+        // 4. Update rich value relationship targets (richValueRel.xml.rels)
+        await this.updateRichValueRelRels(zip, photoCount);
         
-        // 5. Update worksheet to reference drawing
-        await this.updateWorksheetDrawing(zip);
+        // 5. Update metadata.xml with new rich value entries
+        await this.updateMetadata(zip, photoCount);
         
         // 6. Update [Content_Types].xml
         await this.updateContentTypes(zip);
     }
     
-    createDrawingXML(photoCount) {
-        // Create drawing XML with anchors at A10, B10, C10
-        // Use oneCellAnchor for absolute sizing (not tied to cell dimensions)
-        // Max dimension: 130px ≈ 1.35 inches = 1,234,440 EMUs
-        let xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">`;
+    async updateMetadata(zip, photoCount) {
+        const metadataFile = zip.file('xl/metadata.xml');
+        let metadataContent = await metadataFile.async('string');
         
+        // Parse existing counts (template has 3)
+        const futureMatch = metadataContent.match(/<futureMetadata[^>]*count="(\d+)"/);
+        const valueMatch = metadataContent.match(/<valueMetadata[^>]*count="(\d+)"/);
+        
+        const existingCount = futureMatch ? parseInt(futureMatch[1]) : 3;
+        const newCount = existingCount + photoCount;
+        
+        // Update futureMetadata count
+        metadataContent = metadataContent.replace(
+            /<futureMetadata([^>]*)count="\d+"/,
+            `<futureMetadata$1count="${newCount}"`
+        );
+        
+        // Update valueMetadata count
+        metadataContent = metadataContent.replace(
+            /<valueMetadata([^>]*)count="\d+"/,
+            `<valueMetadata$1count="${newCount}"`
+        );
+        
+        // Add new futureMetadata entries before </futureMetadata>
+        let newFutureEntries = '';
         for (let i = 0; i < photoCount; i++) {
-            const col = i; // Column A=0, B=1, C=2
-            const imageId = i + 1;
-            
-            // Use absolute sizing - 120px max dimension (1,152,000 EMUs)
-            // This is ~1.2 inches, which is safe for 130px limit
-            // Images maintain aspect ratio via noChangeAspect="1"
-            const maxDimension = 1152000; // 120px ≈ 1.2 inches
-            
-            xml += `
-  <xdr:oneCellAnchor>
-    <xdr:from>
-      <xdr:col>${col}</xdr:col>
-      <xdr:colOff>100000</xdr:colOff>
-      <xdr:row>9</xdr:row>
-      <xdr:rowOff>100000</xdr:rowOff>
-    </xdr:from>
-    <xdr:ext cx="${maxDimension}" cy="${maxDimension}"/>
-    <xdr:pic>
-      <xdr:nvPicPr>
-        <xdr:cNvPr id="${imageId}" name="Picture ${imageId}"/>
-        <xdr:cNvPicPr>
-          <a:picLocks noChangeAspect="1"/>
-        </xdr:cNvPicPr>
-      </xdr:nvPicPr>
-      <xdr:blipFill>
-        <a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId${imageId}"/>
-        <a:stretch>
-          <a:fillRect/>
-        </a:stretch>
-      </xdr:blipFill>
-      <xdr:spPr>
-        <a:xfrm>
-          <a:off x="0" y="0"/>
-          <a:ext cx="${maxDimension}" cy="${maxDimension}"/>
-        </a:xfrm>
-        <a:prstGeom prst="rect">
-          <a:avLst/>
-        </a:prstGeom>
-      </xdr:spPr>
-    </xdr:pic>
-    <xdr:clientData/>
-  </xdr:oneCellAnchor>`;
+            const index = existingCount + i; // 3, 4, 5
+            newFutureEntries += `<bk><extLst><ext uri="{3e2802c4-a4d2-4d8b-9148-e3be6c30e623}"><xlrd:rvb i="${index}"/></ext></extLst></bk>`;
         }
         
-        xml += `
-</xdr:wsDr>`;
+        metadataContent = metadataContent.replace('</futureMetadata>', `${newFutureEntries}</futureMetadata>`);
         
-        return xml;
-    }
-    
-    createDrawingRels(photoCount) {
-        let xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
-        
+        // Add new valueMetadata entries before </valueMetadata>
+        let newValueEntries = '';
         for (let i = 0; i < photoCount; i++) {
-            xml += `
-  <Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image${i + 1}.jpg"/>`;
+            const index = existingCount + i; // 3, 4, 5
+            newValueEntries += `<bk><rc t="1" v="${index}"/></bk>`;
         }
         
-        xml += `
-</Relationships>`;
+        metadataContent = metadataContent.replace('</valueMetadata>', `${newValueEntries}</valueMetadata>`);
         
-        return xml;
+        zip.file('xl/metadata.xml', metadataContent);
     }
     
-    async updateWorksheetRels(zip) {
-        const relsPath = 'xl/worksheets/_rels/sheet1.xml.rels';
-        let relsFile = zip.file(relsPath);
-        let relsContent;
+    async updateRichValueData(zip, photoCount) {
+        const rvDataFile = zip.file('xl/richData/rdrichvalue.xml');
+        let rvDataContent = await rvDataFile.async('string');
         
-        if (relsFile) {
-            relsContent = await relsFile.async('string');
-            // Add drawing relationship if not present
-            if (!relsContent.includes('drawing1.xml')) {
-                relsContent = relsContent.replace(
-                    '</Relationships>',
-                    `  <Relationship Id="rIdDrawing1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>
-</Relationships>`
-                );
-            }
-        } else {
-            // Create new rels file
-            relsContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rIdDrawing1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>
-</Relationships>`;
+        // Parse existing count (template has 3)
+        const countMatch = rvDataContent.match(/count="(\d+)"/);
+        const existingCount = countMatch ? parseInt(countMatch[1]) : 3;
+        const newCount = existingCount + photoCount;
+        
+        // Update count
+        rvDataContent = rvDataContent.replace(/count="\d+"/, `count="${newCount}"`);
+        
+        // Add new rich value entries before </rvData>
+        let newEntries = '';
+        for (let i = 0; i < photoCount; i++) {
+            const imageIndex = existingCount + i; // 3, 4, 5
+            newEntries += `<rv s="0"><v>${imageIndex}</v><v>5</v></rv>`;
         }
         
-        zip.file(relsPath, relsContent);
+        rvDataContent = rvDataContent.replace('</rvData>', `${newEntries}</rvData>`);
+        
+        zip.file('xl/richData/rdrichvalue.xml', rvDataContent);
     }
     
-    async updateWorksheetDrawing(zip) {
-        const sheetFile = zip.file('xl/worksheets/sheet1.xml');
-        let sheetContent = await sheetFile.async('string');
+    async updateRichValueRel(zip, photoCount) {
+        const rvRelFile = zip.file('xl/richData/richValueRel.xml');
+        let rvRelContent = await rvRelFile.async('string');
         
-        // Add drawing reference if not present
-        if (!sheetContent.includes('<drawing')) {
-            // Add xmlns:r if not present
-            if (!sheetContent.includes('xmlns:r=')) {
-                sheetContent = sheetContent.replace(
-                    '<worksheet xmlns=',
-                    '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns='
-                );
-            }
-            
-            // Add drawing element before </worksheet>
-            sheetContent = sheetContent.replace(
-                '</worksheet>',
-                `  <drawing r:id="rIdDrawing1"/>
-</worksheet>`
-            );
+        // Add new rel entries before </richValueRels>
+        let newRels = '';
+        for (let i = 0; i < photoCount; i++) {
+            const rId = i + 4; // rId4, rId5, rId6
+            newRels += `<rel r:id="rId${rId}"/>`;
         }
         
-        zip.file('xl/worksheets/sheet1.xml', sheetContent);
+        rvRelContent = rvRelContent.replace('</richValueRels>', `${newRels}</richValueRels>`);
+        
+        zip.file('xl/richData/richValueRel.xml', rvRelContent);
+    }
+    
+    async updateRichValueRelRels(zip, photoCount) {
+        const rvRelRelsFile = zip.file('xl/richData/_rels/richValueRel.xml.rels');
+        let rvRelRelsContent = await rvRelRelsFile.async('string');
+        
+        // Add new relationship entries before </Relationships>
+        let newRelationships = '';
+        for (let i = 0; i < photoCount; i++) {
+            const rId = i + 4; // rId4, rId5, rId6
+            const imageId = i + 4; // image4.jpg, image5.jpg, image6.jpg
+            newRelationships += `<Relationship Id="rId${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image${imageId}.jpg"/>`;
+        }
+        
+        rvRelRelsContent = rvRelRelsContent.replace('</Relationships>', `${newRelationships}</Relationships>`);
+        
+        zip.file('xl/richData/_rels/richValueRel.xml.rels', rvRelRelsContent);
     }
     
     async updateContentTypes(zip) {
