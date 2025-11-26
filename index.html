@@ -2,235 +2,185 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>EPP 4NM - İnteraktif Vaziyet Planı</title>
-
-  <!-- Material Symbols Outlined (MD3 ikon seti) -->
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-
-  <!-- CSS Files: Base structure + Components -->
-  <link rel="stylesheet" href="styles/base.css" />
-  <link rel="stylesheet" href="styles/components.css" />
+  <title>Şantiye Hesap Araçları</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/donatiCalculations.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/layout.js"></script>
 </head>
 <body>
-  <header>
-    <img src="img/logo.png" alt="Logo" class="logo" />
-    <span class="chip">İnteraktif Vaziyet Planı</span>
-
-    <span id="lastExportLabel" class="chip last-export">Son kayıt: -</span>
-    <span id="projectNameLabel" class="chip" style="display:none;"></span>
-
-    <div class="spacer"></div>
-
-    <button id="projectInfoBtn"
-            class="icon-top-button"
-            title="Proje bilgileri"
-            style="display:none">
-      <span class="material-symbols-outlined">info</span>
-    </button>
-
-    <button id="passwordSettingsBtn"
-            class="icon-top-button"
-            title="Düzenleme PIN'i"
-            style="display:none">
-      <span class="material-symbols-outlined">vpn_key</span>
-    </button>
-
-    <div class="mode-toggle" id="modeToggle">
-      <button data-mode="viewer" class="active">Görüntüle</button>
-      <button data-mode="editor">Düzenle</button>
+  <div class="appbar">
+    <h1>Şantiye Araç Kiti</h1>
+    <div class="tabs">
+      <div class="tab active" data-index="0">Donatı tahvil</div>
+      <div class="tab" data-index="1">Donatı kesit alanı</div>
+      <div class="tab" data-index="2">Kenetlenme boyu</div>
+      <div class="tab" data-index="3">Hakkında</div>
     </div>
-
-    <button id="aboutBtn" class="icon-top-button" title="Hakkında">
-      <span class="material-symbols-outlined">info</span>
-    </button>
-  </header>
-
-  <main>
-    <div class="canvas-column">
-      <div class="toolbar">
-        <label
-          id="mainImageWrapper"
-          class="icon-button"
-          title="Ana görsel yükle (yalnızca düzenleme modunda)"
-          style="display:none">
-          <span class="material-symbols-outlined">image</span>
-          <input type="file" id="mainImageInput" accept="image/*">
-        </label>
-
-        <label title="İmalat görünümü">
-          <select id="workViewSelect"></select>
-        </label>
-        
-        <span id="workViewStats" class="chip" style="display:none;font-size:11px;"></span>
-
-        <button id="resetViewBtn" title="Görünümü sıfırla">
-          <span class="material-symbols-outlined">restart_alt</span>
-        </button>
-        <button id="panModeBtn" title="Pan modunu aç/kapat">
-          <span class="material-symbols-outlined">pan_tool_alt</span>
-        </button>
-        <button id="labelsBtn" title="Blok etiketlerini göster/gizle">
-          <span class="material-symbols-outlined">label</span>
-        </button>
-        <button id="exportBtn" title="Kaydet">
-          <span class="material-symbols-outlined">save</span>
-        </button>
-        <button id="importBtn" title="Aç">
-          <span class="material-symbols-outlined">folder_open</span>
-        </button>
-
-        <div class="toolbar-separator"></div>
-
-        <button id="summaryBtn" title="Puantaj">
-          <span class="material-symbols-outlined">groups</span>
-        </button>
-        <button id="readyBtn" title="Başlayabilir İmalatlar">
-          <span class="material-symbols-outlined">play_circle</span>
-        </button>
-        <button id="issuesBtn" title="İmalat Sorunları">
-          <span class="material-symbols-outlined">warning</span>
-        </button>
-
-        <input type="file" id="importInput" accept=".epp,.zip,application/zip" style="display:none">
-      </div>
-
-      <div class="draw-toolbar" id="drawToolbar" style="display:none">
-        <button id="addBlockBtn" title="Yeni blok oluştur">
-          <span class="material-symbols-outlined">add_box</span>
-        </button>
-        <button id="drawLineBtn" title="Çizgi çiz">
-          <span class="material-symbols-outlined">show_chart</span>
-        </button>
-        <button id="drawCurveBtn" title="Eğri çiz">
-          <span class="material-symbols-outlined">timeline</span>
-        </button>
-        <button id="addTextBtn" title="Metin ekle">
-          <span class="material-symbols-outlined">text_fields</span>
-        </button>
-      </div>
-
-      <div class="canvas-wrapper" id="canvasWrapper">
-        <div id="viewport">
-          <img id="mainImage" alt="Vaziyet planı">
-          <svg id="drawingLayer" style="position:absolute;top:0;left:0;pointer-events:none;width:100%;height:100%;"></svg>
-          <div id="textLayer" style="position:absolute;top:0;left:0;pointer-events:none;"></div>
-          <div id="hotspotLayer"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="asideBackdrop" class="aside-backdrop"></div>
-    <aside>
-      <header>Detaylar</header>
-      <div class="side-body" id="sideBody"></div>
-    </aside>
-  </main>
-
-  <!-- Hakkında -->
-  <div id="aboutOverlay" class="modal-backdrop">
-    <div class="modal-dialog">
-      <h2>Hakkında</h2>
-      <img src="img/about-logo.png" alt="Hakkında Logo" class="about-logo">
-      <p style="margin-top:8px;font-size:12px;">2025 (C)</p>
-      <p class="hint">Kapatmak için pencere dışına tıklayın.</p>
-    </div>
+    <div class="tab-underline"></div>
   </div>
 
-  <!-- Düzenleme PIN ayarı -->
-  <div id="passwordSettingsOverlay" class="modal-backdrop">
-    <div class="modal-dialog">
-      <h2>Düzenleme PIN'i</h2>
-      <p>Bu dosya için 4 haneli bir düzenleme PIN'i belirleyebilirsin. Tüm kutuları boş bırakırsan koruma kaldırılır.</p>
-      <div class="pin-row" id="passwordSettingsPin">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-      </div>
-      <div class="modal-actions">
-        <button id="passwordSettingsCancel">Vazgeç</button>
-        <button id="passwordSettingsSave">Kaydet</button>
-      </div>
-      <p class="hint">Bu PIN EPP içindeki config.json'da düz metin olarak saklanır.</p>
-    </div>
+  <div id="donati" data-index="0" class="tab-content active">
+    <h2>Donatı Eşdeğerlik Hesabı</h2>
+    <label>Kaynak Donatı Çapı (mm):</label>
+    <select id="source">
+      <!-- seçenekler -->
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+      <option value="24">Ø24</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
+
+    <label>Adet:</label>
+    <input type="number" id="count" value="1" min="1" />
+
+    <label>Hedef Donatı Çapı (mm):</label>
+    <select id="target">
+      <!-- seçenekler -->
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+      <option value="24">Ø24</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
+
+    <label>Toplam genişlik (cm):</label>
+    <input type="number" id="length" step="any" />
+
+    <button onclick="calculate()">HESAPLA</button>
+    <div class="result" id="result"></div>
+	
+	<div id="placementDiv" style="display:flex; align-items:center; margin-top:20px;"></div>
+
+    <h4>Notlar:</h4>
+    <p>1. Donatı yerleşimleri temel ve döşemede aynı aralıkta yapılmalıdır.</p>
+    <p>2. Tahvil için en fazla iki küçük veya büyük çapta donatı önerilir.</p>
+    <p>3. Düşey donatıda tahvil önerilmez.</p>
   </div>
 
-  <!-- Düzenleme PIN prompt -->
-  <div id="passwordPromptOverlay" class="modal-backdrop">
-    <div class="modal-dialog">
-      <h2>Düzenleme kilitli</h2>
-      <p>Düzenleme moduna geçmek için PIN gir.</p>
-      <div class="pin-row" id="passwordPromptPin">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-        <input type="password" inputmode="numeric" maxlength="1" class="pin-box" autocomplete="off">
-      </div>
-      <div class="modal-actions">
-        <button id="passwordPromptCancel">İptal</button>
-        <button id="passwordPromptOk">Devam</button>
-      </div>
-      <p class="hint">4 haneli PIN.</p>
-    </div>
+  <div id="rho" data-index="1" class="tab-content">
+    <h2>A<sub>s<sub>min</sub></sub> / A<sub>s<sub>max</sub></sub> Hesaplayıcı</h2>
+    <label>Eleman Tipi:</label>
+    <select id="eleman">
+      <option value="kolon">Kolon</option>
+      <option value="kiris">Kiriş</option>
+      <option value="doseme">Döşeme</option>
+    </select>
+
+    <label>Genişlik b (mm):</label>
+    <input type="number" id="b" />
+
+    <label>Etkin Yükseklik d (mm):</label>
+    <input type="number" id="d" />
+
+    <button onclick="calculateRho()">HESAPLA</button>
+    <div class="result" id="rhoResult"></div>
   </div>
 
-  <!-- Proje bilgileri -->
-  <div id="projectInfoOverlay" class="modal-backdrop">
-    <div class="modal-dialog">
-      <h2>Proje bilgileri</h2>
-      <p>Bu EPP dosyasına ait proje adını ve yükleniciyi kaydedebilirsin.</p>
-      <label for="projectNameInput">Proje adı</label>
-      <input type="text" id="projectNameInput" placeholder="Örn. KAHRAMANMARAŞ DULKADİROĞLU MERKEZ 15 2. ETAP 1. KISIM">
-      <label for="projectContractorInput" style="margin-top:8px;">Yüklenici</label>
-      <input type="text" id="projectContractorInput" placeholder="Örn. SUR YAPI Endüstri San. ve Tic. A.Ş.">
-      <label for="projectContractorCodeInput" style="margin-top:8px;">Yüklenici Kodu</label>
-      <input type="text" id="projectContractorCodeInput" placeholder="Örn. YD13">
-      <label for="projectContractorShortInput" style="margin-top:8px;">Yüklenici Kısa Adı</label>
-      <input type="text" id="projectContractorShortInput" placeholder="Örn. SUR">
-      <div class="modal-actions">
-        <button id="projectInfoCancel">Vazgeç</button>
-        <button id="projectInfoSave">Kaydet</button>
-      </div>
-      <p class="hint">Bu bilgiler EPP içindeki config.json'da düz metin olarak saklanır.</p>
+  <div id="kenetlenme" data-index="2" class="tab-content">
+    <h2>Kenetlenme boyu</h2>
+    <label>Donatı akma dayanımı(fyk):</label>
+    <select id="fyk">
+      <option value="220">220 MPa</option>
+      <option value="420">420 MPa</option>
+      <option value="500">500 MPa</option>
+    </select>
+
+    <label>Beton sınıfı:</label>
+    <select id="fck">
+      <option value="14">C14</option>
+      <option value="16">C16</option>
+      <option value="18">C18</option>
+      <option value="20">C20</option>
+      <option value="25">C25</option>
+      <option value="30">C30</option>
+      <option value="35">C35</option>
+      <option value="40">C40</option>
+      <option value="45">C45</option>
+      <option value="50">C50</option>
+    </select>
+
+    <label>Donatı Çapı (mm):</label>
+    <select id="d_overlap">
+      <option value="8">Ø8</option>
+      <option value="10">Ø10</option>
+      <option value="12">Ø12</option>
+      <option value="14">Ø14</option>
+      <option value="16">Ø16</option>
+      <option value="18">Ø18</option>
+      <option value="20">Ø20</option>
+      <option value="22">Ø22</option>
+      <option value="24">Ø24</option>
+      <option value="25">Ø25</option>
+      <option value="26">Ø26</option>
+      <option value="28">Ø28</option>
+      <option value="30">Ø30</option>
+      <option value="32">Ø32</option>
+      <option value="36">Ø36</option>
+    </select>
+    <button onclick="calculateOverlap()">HESAPLA</button>
+    <div class="result" id="resultO"></div>
+
+    <h4>Notlar:</h4>
+
+    <p>Kenetlenme boyu:</p>
+    <p>
+    \[
+    l_b =
+    \begin{cases}
+    0{,}12 \times \left( \dfrac{f_{yd}}{f_{ctd}} \right) \times \phi_{\text{donatı}} \\
+    20\phi
+    \end{cases}
+    \]
+    </p>
+
+    <p>Bindirme boyu:</p>
+    <p>
+      \[
+      l_{o} = 1{,}4 \times \left( 1 + 0{,}5 \times r \right) \times l_b
+      \]
+    </p>
+
+    <div class="math-block">
+      <div class="math-line">\( f_{yd} \): Donatı tasarım akma dayanımı</div>
+      <div class="math-line">\( f_{ctd} \): Beton tasarım çekme dayanımı</div>
+      <div class="math-line">\( \varnothing \): Donatı çapı</div>
+      <div class="math-line">\( r \): Artırma katsayısı (örnek: 0,3)</div>
     </div>
+
+    <p>TS500 - 9.1.2.1</p>
+    <p>1. Eğer kenetlenme hesabı 20Ø'den kısaysa, kenetlenme 20Ø alınır.</p>
   </div>
 
-  <!-- Detay görseli büyük gösterme -->
-  <div id="detailImageOverlay" class="modal-backdrop">
-    <div class="modal-dialog" id="detailImageDialog">
-      <img id="detailImageLarge" alt="Detay" />
-    </div>
+  <div id="hakkinda" data-index="3" class="tab-content">
+    <h2>Hakkında</h2>
+    <p>Bu araç, sahada hızlıca donatı çap tahvili ve minimum/maksimum donatı oranlarını hesaplamak için tasarlanmıştır.</p>
+    <p>Hazırlayan: Mustafa Burak BESLER</p>
   </div>
 
-  <!-- JSZip and XLSXPatcher -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="js/xlsx_patcher.js"></script>
-
-  <!-- NCR System -->
-  <script src="js/ncr-constants.js"></script>
-  <script src="js/ncr-excel-patcher.js"></script>
-
-  <!-- App scripts (order matters) -->
-  <script src="js/constants.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/state.js"></script>
-  <!-- Render modules (modular breakdown) -->
-  <script src="js/render/render-hotspots.js"></script>
-  <script src="js/render/render-carousel.js"></script>
-  <script src="js/render/render-summary.js"></script>
-  <script src="js/render/render-sidepanel.js"></script>
-  <script src="js/render/render-ui.js"></script>
-  <script src="js/render/render-drawing.js"></script>
-  <!-- Events modules (modular breakdown) -->
-  <script src="js/events/events-init.js"></script>
-  <script src="js/events/events-modals.js"></script>
-  <script src="js/events/events-toolbar.js"></script>
-  <script src="js/events/events-canvas.js"></script>
-  <script src="js/events/events-io.js"></script>
-  <script src="js/events/events-hotspots.js"></script>
-  <script src="js/events/events-shortcuts.js"></script>
-  <!-- NCR Events -->
-  <script src="js/events/events-ncr.js"></script>
 </body>
 </html>
