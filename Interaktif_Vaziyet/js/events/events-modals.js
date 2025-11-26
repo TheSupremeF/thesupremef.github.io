@@ -166,13 +166,18 @@
       projectInfoBtn, projectInfoOverlay, projectNameInput,
       projectContractorInput, projectInfoCancel, projectInfoSave
     } = ns.dom;
+    
+    const projectContractorCodeInput = document.getElementById('projectContractorCodeInput');
+    const projectContractorShortInput = document.getElementById('projectContractorShortInput');
 
     if (projectInfoBtn && projectInfoOverlay) {
       projectInfoBtn.addEventListener('click', () => {
         if (ns.state.mode !== 'editor') return;
-        const info = ns.state.projectInfo || { name: '', contractor: '' };
+        const info = ns.state.projectInfo || { name: '', contractor: '', contractorCode: '', contractorShort: '' };
         if (projectNameInput) projectNameInput.value = info.name || '';
         if (projectContractorInput) projectContractorInput.value = info.contractor || '';
+        if (projectContractorCodeInput) projectContractorCodeInput.value = info.contractorCode || '';
+        if (projectContractorShortInput) projectContractorShortInput.value = info.contractorShort || '';
         projectInfoOverlay.style.display = 'flex';
         setTimeout(() => {
           if (projectNameInput) projectNameInput.focus();
@@ -192,7 +197,9 @@
       projectInfoSave.addEventListener('click', () => {
         const name = projectNameInput ? projectNameInput.value.trim() : '';
         const contractor = projectContractorInput ? projectContractorInput.value.trim() : '';
-        ns.state.projectInfo = { name, contractor };
+        const contractorCode = projectContractorCodeInput ? projectContractorCodeInput.value.trim() : '';
+        const contractorShort = projectContractorShortInput ? projectContractorShortInput.value.trim() : '';
+        ns.state.projectInfo = { name, contractor, contractorCode, contractorShort };
         ns.updateProjectNameLabel();
         projectInfoOverlay.style.display = 'none';
       });

@@ -75,13 +75,32 @@
         const worksClean = {};
         const srcWorks = hs.works || {};
         ALL_WORK_ITEMS.forEach(w => {
-          const item = srcWorks[w.id] || { status: 'baslamadi', workers: 0, subcontractor: '' };
+          const item = srcWorks[w.id] || { status: 'veri_girilmedi', workers: 0, subcontractor: '', startDate: '', endDate: '' };
           worksClean[w.id] = {
-            status: item.status || 'baslamadi',
+            status: item.status || 'veri_girilmedi',
+            startDate: item.startDate || '',
+            endDate: item.endDate || '',
             workers: typeof item.workers === 'number' ? item.workers : 0,
             subcontractor: typeof item.subcontractor === 'string' ? item.subcontractor : ''
           };
         });
+
+        // Issues'ları da ekle
+        const issuesClean = [];
+        if (hs.issues && Array.isArray(hs.issues)) {
+          hs.issues.forEach(issue => {
+            issuesClean.push({
+              id: issue.id || '',
+              title: issue.title || '',
+              description: issue.description || '',
+              createdAt: issue.createdAt || '',
+              workTypeId: issue.workTypeId || '',
+              status: issue.status || 'open',
+              priority: issue.priority || 'medium',
+              photos: issue.photos || []
+            });
+          });
+        }
 
         cfg.hotspots.push({
           id: hs.id,
@@ -102,7 +121,8 @@
           works: worksClean,
           floorCount: typeof hs.floorCount === 'number' ? hs.floorCount : 0,
           buildingType: typeof hs.buildingType === 'string' ? hs.buildingType : '',
-          dailyRecords: Array.isArray(hs.dailyRecords) ? hs.dailyRecords : []
+          dailyRecords: Array.isArray(hs.dailyRecords) ? hs.dailyRecords : [],
+          issues: issuesClean
         });
       });
 
@@ -217,6 +237,7 @@
             const floorCount = typeof h.floorCount === 'number' ? h.floorCount : 0;
             const buildingType = typeof h.buildingType === 'string' ? h.buildingType : '';
             const dailyRecords = Array.isArray(h.dailyRecords) ? h.dailyRecords : [];
+            const issues = Array.isArray(h.issues) ? h.issues : [];
 
             return {
               id: h.id,
@@ -237,7 +258,8 @@
               works,
               floorCount,
               buildingType,
-              dailyRecords
+              dailyRecords,
+              issues
             };
           });
 
@@ -270,7 +292,6 @@
       reader.readAsArrayBuffer(file);
     });
   }
-
 
   ns.wireExportImport = wireExportImport;
 })(window.EPP = window.EPP || {});

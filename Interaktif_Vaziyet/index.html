@@ -184,6 +184,10 @@
       <input type="text" id="projectNameInput" placeholder="Örn. KAHRAMANMARAŞ DULKADİROĞLU MERKEZ 15 2. ETAP 1. KISIM">
       <label for="projectContractorInput" style="margin-top:8px;">Yüklenici</label>
       <input type="text" id="projectContractorInput" placeholder="Örn. SUR YAPI Endüstri San. ve Tic. A.Ş.">
+      <label for="projectContractorCodeInput" style="margin-top:8px;">Yüklenici Kodu</label>
+      <input type="text" id="projectContractorCodeInput" placeholder="Örn. YD13">
+      <label for="projectContractorShortInput" style="margin-top:8px;">Yüklenici Kısa Adı</label>
+      <input type="text" id="projectContractorShortInput" placeholder="Örn. SUR">
       <div class="modal-actions">
         <button id="projectInfoCancel">Vazgeç</button>
         <button id="projectInfoSave">Kaydet</button>
@@ -199,9 +203,13 @@
     </div>
   </div>
 
-  <!-- JSZip ve XLSX CDN -->
+  <!-- JSZip and XLSXPatcher -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/xlsx_patcher.js"></script>
+
+  <!-- NCR System -->
+  <script src="js/ncr-constants.js"></script>
+  <script src="js/ncr-excel-patcher.js"></script>
 
   <!-- App scripts (order matters) -->
   <script src="js/constants.js"></script>
@@ -222,5 +230,7 @@
   <script src="js/events/events-io.js"></script>
   <script src="js/events/events-hotspots.js"></script>
   <script src="js/events/events-shortcuts.js"></script>
+  <!-- NCR Events -->
+  <script src="js/events/events-ncr.js"></script>
 </body>
 </html>

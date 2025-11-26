@@ -22,9 +22,35 @@
     lastExportAt: null,
     editorPassword: '',
     editorUnlocked: true,
-    projectInfo: { name: '', contractor: '' },
+    projectInfo: { 
+      name: '', 
+      contractor: '',
+      contractorCode: '',
+      contractorShort: ''
+    },
     selectedDate: new Date().toISOString().split('T')[0],
     drawMode: null
+  };
+  
+  // Create issue with NCR fields
+  ns.createIssue = function(params = {}) {
+    return {
+      id: 'issue-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+      description: params.description || '',
+      photos: params.photos || [],
+      status: params.status || 'open',
+      createdDate: params.createdDate || new Date().toISOString().split('T')[0],
+      resolutionDate: params.resolutionDate || '',
+      resolutionNotes: params.resolutionNotes || '',
+      
+      // NCR fields
+      ncrType: params.ncrType || 'STC',
+      ncrNumber: params.ncrNumber || 1,
+      controlEngineerName: params.controlEngineerName || '',
+      controlEngineerDate: params.controlEngineerDate || '',
+      controlChiefName: params.controlChiefName || '',
+      controlChiefDate: params.controlChiefDate || ''
+    };
   };
 
   ns.STATUS_OPTIONS = [

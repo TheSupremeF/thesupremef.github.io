@@ -6,13 +6,18 @@
       items: [
         { id: 'kazi', label: 'Kazı İmalatları' },
         { id: 'kazik', label: 'Kazık İmalatları' },
+        { id: 'muhendislik_dolgusu', label: 'Mühendislik Dolgusu İmalatları' },
         { id: 'grobeton', label: 'Grobeton İmalatları' },
         { id: 'temel_alti_yalitim', label: 'Temel Altı Yalıtım İmalatları' },
         { id: 'temel', label: 'Temel İmalatları' },
         { id: 'tunnel_kalip', label: 'Tünel Kalıp İmalatları' },
-        { id: 'balkon_parapet', label: 'Balkon Parapet İmalatları' },
+        { id: 'balkon_parapet', label: 'Balkon Topuk / Parapet İmalatları' },
         { id: 'merdiven', label: 'Merdiven İmalatları' },
         { id: 'cati_parapeti_asansor_kulesi', label: 'Çatı Parapeti ve Asansör Kulesi İmalatları' },
+        { id: 'kapama_perdeleri', label: 'Kapama Perdeleri İmalatları' },
+        { id: 'baca', label: 'Baca İmalatları' },
+        { id: 'perde_izolasyonu', label: 'Perde İzolasyonu İmalatları' },
+        { id: 'drenaj', label: 'Drenaj İmalatları' },
         { id: 'cati_koruma_betonu', label: 'Çatı Koruma Betonu İmalatları' },
         { id: 'cati_yalitim', label: 'Çatı Yalıtım İmalatları' }
       ]
@@ -23,7 +28,9 @@
       items: [
         { id: 'duvar', label: 'Duvar İmalatları' },
         { id: 'ic_mekan_kara_siva', label: 'İç Mekan Kara Sıva İmalatları' },
-        { id: 'alci_siva', label: 'Alçı Sıva İmalatları' },
+        { id: 'alci_siva', label: 'Kaba Karışık Alçı Sıva İmalatları' },
+        { id: 'saten_alci', label: 'Saten Alçı İmalatları' },
+        { id: 'kor_kasa', label: 'Kör Kasa Montajları' },
         { id: 'sap', label: 'Şap İmalatları' },
         { id: 'mermer', label: 'Mermer İmalatları' },
         { id: 'seramik', label: 'Seramik İmalatları' },
@@ -34,16 +41,15 @@
       id: 'dis_cephe',
       label: 'DIŞ CEPHE İNCE İMALATLARI',
       items: [
-        { id: 'iskele', label: 'İskele İmalatları' },
+        { id: 'iskele', label: 'Dış Cephe İskele İmalatları' },
         { id: 'dis_cephe_kara_siva', label: 'Dış Cephe Kara Sıva İmalatları' },
         { id: 'mantolama', label: 'Mantolama İmalatları' },
         { id: 'mineral_siva', label: 'Mineral Sıva İmalatları' },
-        { id: 'dograma', label: 'Doğrama Montajları' },
+        { id: 'dograma', label: 'Dış Cephe Doğrama Montajları' },
         { id: 'dis_cephe_boya', label: 'Dış Cephe Boya İmalatları' },
         { id: 'bina_giris_dogramalari', label: 'Bina Giriş Doğramaları' },
         { id: 'merdiven_korkuluk', label: 'Merdiven Korkulukları' },
-        { id: 'balkon_korkuluk', label: 'Balkon Korkulukları' },
-        { id: 'asansor', label: 'Asansör Montajları' }
+        { id: 'balkon_korkuluk', label: 'Balkon Korkulukları' }
       ]
     }
   ];

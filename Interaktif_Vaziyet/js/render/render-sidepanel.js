@@ -73,9 +73,10 @@
 
       if (hs.description && hs.description.trim()) {
         const descP = document.createElement('p');
-        descP.textContent = hs.description.trim();
+        descP.innerHTML = hs.description.trim(); // Render HTML formatting
         descP.style.fontSize = '12px';
         descP.style.marginBottom = '8px';
+        descP.style.lineHeight = '1.5';
         secView.appendChild(descP);
       }
 
@@ -274,7 +275,8 @@
             issueDesc.style.fontSize = '11px';
             issueDesc.style.color = '#d1d5db';
             issueDesc.style.marginBottom = '6px';
-            issueDesc.textContent = issue.description.trim();
+            issueDesc.style.lineHeight = '1.5';
+            issueDesc.innerHTML = issue.description.trim(); // Render HTML formatting
             issueCard.appendChild(issueDesc);
           }
 
@@ -349,6 +351,25 @@
 
             issueCard.appendChild(photosDiv);
           }
+          
+          // Convert to NCR button
+          const ncrButton = document.createElement('button');
+          ncrButton.textContent = '📋 NCR\'a Dönüştür';
+          ncrButton.style.marginTop = '8px';
+          ncrButton.style.padding = '6px 12px';
+          ncrButton.style.background = '#2563eb';
+          ncrButton.style.color = '#fff';
+          ncrButton.style.border = 'none';
+          ncrButton.style.borderRadius = '4px';
+          ncrButton.style.fontSize = '11px';
+          ncrButton.style.cursor = 'pointer';
+          ncrButton.style.width = '100%';
+          ncrButton.addEventListener('click', () => {
+            if (typeof ns.exportIssueToNcrExcel === 'function') {
+              ns.exportIssueToNcrExcel(hs.id, issue.id);
+            }
+          });
+          issueCard.appendChild(ncrButton);
 
           secView.appendChild(issueCard);
         });
@@ -505,24 +526,65 @@
     borderColorRow.appendChild(borderOpacityLabel);
     secEdit.appendChild(borderColorRow);
 
-    const imagesHeader = document.createElement('h3');
-    imagesHeader.textContent = 'Detay Görselleri';
-    imagesHeader.style.marginTop = '8px';
-    secEdit.appendChild(imagesHeader);
+    // DETAY GÖRSELLERİ - Collapsible Section
+    const imagesSection = document.createElement('div');
+    imagesSection.style.marginTop = '16px';
+    imagesSection.style.border = '1px solid #374151';
+    imagesSection.style.borderRadius = '6px';
+    imagesSection.style.overflow = 'hidden';
+    
+    const imagesHeader = document.createElement('div');
+    imagesHeader.style.display = 'flex';
+    imagesHeader.style.justifyContent = 'space-between';
+    imagesHeader.style.alignItems = 'center';
+    imagesHeader.style.padding = '8px 10px';
+    imagesHeader.style.background = '#1f2937';
+    imagesHeader.style.cursor = 'pointer';
+    imagesHeader.style.userSelect = 'none';
+    
+    const imagesTitle = document.createElement('span');
+    imagesTitle.textContent = '📸 Detay Görselleri';
+    imagesTitle.style.fontSize = '12px';
+    imagesTitle.style.fontWeight = '600';
+    imagesTitle.style.color = '#e5e7eb';
+    
+    const imagesToggle = document.createElement('span');
+    imagesToggle.textContent = '▼';
+    imagesToggle.style.fontSize = '10px';
+    imagesToggle.style.color = '#9ca3af';
+    imagesToggle.style.transition = 'transform 0.2s';
+    
+    imagesHeader.appendChild(imagesTitle);
+    imagesHeader.appendChild(imagesToggle);
+    
+    const imagesContent = document.createElement('div');
+    imagesContent.style.padding = '10px';
+    imagesContent.style.background = '#111827';
+    imagesContent.style.display = 'block'; // Start expanded
+    
+    imagesHeader.addEventListener('click', () => {
+      const isHidden = imagesContent.style.display === 'none';
+      imagesContent.style.display = isHidden ? 'block' : 'none';
+      imagesToggle.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+    });
+    
+    imagesSection.appendChild(imagesHeader);
+    imagesSection.appendChild(imagesContent);
+    secEdit.appendChild(imagesSection);
 
     if (!hs.detailImages) hs.detailImages = [];
     if (hs.detailImages.length === 0) {
       const hint = document.createElement('p');
       hint.className = 'hint';
       hint.textContent = 'Henüz detay görseli yok.';
-      secEdit.appendChild(hint);
+      imagesContent.appendChild(hint);
     } else {
       hs.detailImages.forEach((img, idx) => {
         const imgRow = document.createElement('div');
         imgRow.style.marginBottom = '8px';
         imgRow.style.padding = '4px';
         imgRow.style.borderRadius = '4px';
-        imgRow.style.background = '#111827';
+        imgRow.style.background = '#1f2937';
 
         const imgEl = document.createElement('img');
         imgEl.src = img.url;
@@ -550,7 +612,7 @@
         });
         imgRow.appendChild(deleteBtn);
 
-        secEdit.appendChild(imgRow);
+        imagesContent.appendChild(imgRow);
       });
     }
 
@@ -569,18 +631,59 @@
         };
         reader.readAsDataURL(file);
       });
-      secEdit.appendChild(addImgInput);
+      imagesContent.appendChild(addImgInput);
     } else {
       const hint = document.createElement('p');
       hint.className = 'hint';
       hint.textContent = 'Maksimum 4 görsel ekleyebilirsiniz.';
-      secEdit.appendChild(hint);
+      imagesContent.appendChild(hint);
     }
 
-    const dailyHeader = document.createElement('h3');
-    dailyHeader.textContent = 'Günlük Puantaj';
-    dailyHeader.style.marginTop = '8px';
-    secEdit.appendChild(dailyHeader);
+    // GÜNLÜK PUANTAJ - Collapsible Section
+    const dailySection = document.createElement('div');
+    dailySection.style.marginTop = '16px';
+    dailySection.style.border = '1px solid #374151';
+    dailySection.style.borderRadius = '6px';
+    dailySection.style.overflow = 'hidden';
+    
+    const dailyHeader = document.createElement('div');
+    dailyHeader.style.display = 'flex';
+    dailyHeader.style.justifyContent = 'space-between';
+    dailyHeader.style.alignItems = 'center';
+    dailyHeader.style.padding = '8px 10px';
+    dailyHeader.style.background = '#1f2937';
+    dailyHeader.style.cursor = 'pointer';
+    dailyHeader.style.userSelect = 'none';
+    
+    const dailyTitle = document.createElement('span');
+    dailyTitle.textContent = '📅 Günlük Puantaj';
+    dailyTitle.style.fontSize = '12px';
+    dailyTitle.style.fontWeight = '600';
+    dailyTitle.style.color = '#e5e7eb';
+    
+    const dailyToggle = document.createElement('span');
+    dailyToggle.textContent = '▼';
+    dailyToggle.style.fontSize = '10px';
+    dailyToggle.style.color = '#9ca3af';
+    dailyToggle.style.transition = 'transform 0.2s';
+    
+    dailyHeader.appendChild(dailyTitle);
+    dailyHeader.appendChild(dailyToggle);
+    
+    const dailyContent = document.createElement('div');
+    dailyContent.style.padding = '10px';
+    dailyContent.style.background = '#111827';
+    dailyContent.style.display = 'none'; // Start collapsed
+    
+    dailyHeader.addEventListener('click', () => {
+      const isHidden = dailyContent.style.display === 'none';
+      dailyContent.style.display = isHidden ? 'block' : 'none';
+      dailyToggle.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+    });
+    
+    dailySection.appendChild(dailyHeader);
+    dailySection.appendChild(dailyContent);
+    secEdit.appendChild(dailySection);
 
     const dateLabel = document.createElement('label');
     dateLabel.textContent = 'Tarih seç:';
@@ -591,15 +694,15 @@
       ns.state.selectedDate = dateInput.value;
       ns.renderSidePanel();
     });
-    secEdit.appendChild(dateLabel);
-    secEdit.appendChild(dateInput);
+    dailyContent.appendChild(dateLabel);
+    dailyContent.appendChild(dateInput);
 
     const selectedDate = ns.state.selectedDate || new Date().toISOString().split('T')[0];
 
     const dailyHint = document.createElement('p');
     dailyHint.className = 'hint';
     dailyHint.textContent = 'Seçili tarih için imalat durumlarını girin:';
-    secEdit.appendChild(dailyHint);
+    dailyContent.appendChild(dailyHint);
 
     const secWorks = document.createElement('div');
     secWorks.className = 'side-section';
@@ -724,34 +827,47 @@
       });
     });
 
-    secEdit.appendChild(secWorks);
+    dailyContent.appendChild(secWorks);
 
-    // İMALAT SORUNLARI BÖLÜMÜ (EDITOR MODE)
+    // İMALAT SORUNLARI BÖLÜMÜ (EDITOR MODE) - Collapsible
     const issuesSection = document.createElement('div');
     issuesSection.style.marginTop = '16px';
-    issuesSection.style.padding = '10px';
-    issuesSection.style.background = '#111827';
-    issuesSection.style.borderRadius = '6px';
     issuesSection.style.border = '1px solid #374151';
+    issuesSection.style.borderRadius = '6px';
+    issuesSection.style.overflow = 'hidden';
 
     const issuesHeader = document.createElement('div');
     issuesHeader.style.display = 'flex';
     issuesHeader.style.justifyContent = 'space-between';
     issuesHeader.style.alignItems = 'center';
-    issuesHeader.style.marginBottom = '10px';
+    issuesHeader.style.padding = '8px 10px';
+    issuesHeader.style.background = '#1f2937';
+    issuesHeader.style.cursor = 'pointer';
+    issuesHeader.style.userSelect = 'none';
 
-    const issuesTitle = document.createElement('div');
+    const issuesTitle = document.createElement('span');
     issuesTitle.style.fontSize = '12px';
     issuesTitle.style.fontWeight = '600';
     issuesTitle.style.color = '#ef4444';
     issuesTitle.textContent = '⚠️ İMALAT SORUNLARI';
+    
+    const issuesToggle = document.createElement('span');
+    issuesToggle.textContent = '▼';
+    issuesToggle.style.fontSize = '10px';
+    issuesToggle.style.color = '#9ca3af';
+    issuesToggle.style.transition = 'transform 0.2s';
+    issuesToggle.style.marginLeft = 'auto';
+    issuesToggle.style.marginRight = '8px';
+    
     issuesHeader.appendChild(issuesTitle);
+    issuesHeader.appendChild(issuesToggle);
 
     const addIssueBtn = document.createElement('button');
     addIssueBtn.textContent = '+ Yeni Sorun';
     addIssueBtn.style.fontSize = '11px';
     addIssueBtn.style.padding = '4px 8px';
-    addIssueBtn.addEventListener('click', () => {
+    addIssueBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent toggle when clicking add button
       if (!hs.issues) hs.issues = [];
       const now = new Date();
       hs.issues.push({
@@ -762,14 +878,36 @@
         workTypeId: '',
         status: 'open',
         priority: 'medium',
-        photos: []
+        photos: [],
+        // NCR fields
+        ncrType: 'STC',
+        ncrNumber: 1,
+        locationPattern: null, // Will be auto-selected to most detailed option
+        controlEngineerName: '',
+        controlEngineerDate: '',
+        controlChiefName: '',
+        controlChiefDate: ''
       });
       ns.pushHistory('addIssue');
       ns.renderSidePanel();
     });
     issuesHeader.appendChild(addIssueBtn);
+    
+    const issuesContent = document.createElement('div');
+    issuesContent.style.padding = '10px';
+    issuesContent.style.background = '#111827';
+    issuesContent.style.display = 'block'; // Start expanded
+    
+    issuesHeader.addEventListener('click', (e) => {
+      if (e.target !== addIssueBtn && !addIssueBtn.contains(e.target)) {
+        const isHidden = issuesContent.style.display === 'none';
+        issuesContent.style.display = isHidden ? 'block' : 'none';
+        issuesToggle.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+      }
+    });
 
     issuesSection.appendChild(issuesHeader);
+    issuesSection.appendChild(issuesContent);
 
     if (!hs.issues) hs.issues = [];
 
@@ -780,7 +918,7 @@
       noIssues.style.textAlign = 'center';
       noIssues.style.padding = '8px';
       noIssues.textContent = 'Henüz sorun kaydı yok';
-      issuesSection.appendChild(noIssues);
+      issuesContent.appendChild(noIssues);
     } else {
       hs.issues.forEach((issue, idx) => {
         const issueCard = document.createElement('div');
@@ -823,7 +961,7 @@
           issueCard.appendChild(createdAtDiv);
         }
 
-        // Açıklama
+        // Açıklama - WYSIWYG Editor
         const descLabel = document.createElement('label');
         descLabel.textContent = 'Açıklama';
         descLabel.style.fontSize = '10px';
@@ -832,17 +970,134 @@
         descLabel.style.display = 'block';
         descLabel.style.marginBottom = '4px';
         issueCard.appendChild(descLabel);
-
-        const descInput = document.createElement('textarea');
-        descInput.value = issue.description || '';
-        descInput.rows = 2;
-        descInput.style.width = '100%';
-        descInput.style.marginBottom = '6px';
-        descInput.style.resize = 'vertical';
-        descInput.addEventListener('input', () => {
-          issue.description = descInput.value;
+        
+        // WYSIWYG Toolbar
+        const toolbar = document.createElement('div');
+        toolbar.style.display = 'flex';
+        toolbar.style.gap = '4px';
+        toolbar.style.marginBottom = '4px';
+        toolbar.style.flexWrap = 'wrap';
+        
+        const createToolbarBtn = (label, command) => {
+          const btn = document.createElement('button');
+          btn.textContent = label;
+          btn.type = 'button';
+          btn.style.padding = '4px 8px';
+          btn.style.fontSize = '10px';
+          btn.style.background = '#374151';
+          btn.style.color = '#e5e7eb';
+          btn.style.border = '1px solid #4b5563';
+          btn.style.borderRadius = '3px';
+          btn.style.cursor = 'pointer';
+          btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            document.execCommand(command, false, null);
+            descEditor.focus();
+          });
+          return btn;
+        };
+        
+        toolbar.appendChild(createToolbarBtn('B', 'bold'));
+        toolbar.appendChild(createToolbarBtn('I', 'italic'));
+        toolbar.appendChild(createToolbarBtn('• List', 'insertUnorderedList'));
+        toolbar.appendChild(createToolbarBtn('1. List', 'insertOrderedList'));
+        
+        // Font size dropdown
+        const fontSizeSelect = document.createElement('select');
+        fontSizeSelect.style.padding = '4px';
+        fontSizeSelect.style.fontSize = '10px';
+        fontSizeSelect.style.background = '#374151';
+        fontSizeSelect.style.color = '#e5e7eb';
+        fontSizeSelect.style.border = '1px solid #4b5563';
+        fontSizeSelect.style.borderRadius = '3px';
+        fontSizeSelect.style.cursor = 'pointer';
+        
+        const fontSizes = [
+          { label: '10pt', value: '10pt' },
+          { label: '11pt', value: '11pt' },
+          { label: '12pt', value: '12pt' },
+          { label: '14pt', value: '14pt' },
+          { label: '16pt', value: '16pt' }
+        ];
+        
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Font Size';
+        fontSizeSelect.appendChild(defaultOption);
+        
+        fontSizes.forEach(size => {
+          const opt = document.createElement('option');
+          opt.value = size.value;
+          opt.textContent = size.label;
+          fontSizeSelect.appendChild(opt);
         });
-        issueCard.appendChild(descInput);
+        
+        fontSizeSelect.addEventListener('change', (e) => {
+          if (e.target.value) {
+            // Apply font size to selection
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+              const range = selection.getRangeAt(0);
+              const span = document.createElement('span');
+              span.style.fontSize = e.target.value;
+              
+              try {
+                range.surroundContents(span);
+              } catch (err) {
+                // If selection spans multiple elements, use execCommand fallback
+                document.execCommand('fontSize', false, '7');
+                // Find the font tags and replace with span
+                const fontTags = descEditor.querySelectorAll('font[size="7"]');
+                fontTags.forEach(font => {
+                  const newSpan = document.createElement('span');
+                  newSpan.style.fontSize = e.target.value;
+                  newSpan.innerHTML = font.innerHTML;
+                  font.replaceWith(newSpan);
+                });
+              }
+              
+              issue.description = descEditor.innerHTML;
+            }
+            e.target.value = ''; // Reset dropdown
+            descEditor.focus();
+          }
+        });
+        
+        toolbar.appendChild(fontSizeSelect);
+        issueCard.appendChild(toolbar);
+        
+        // WYSIWYG Editor (contenteditable)
+        const descEditor = document.createElement('div');
+        descEditor.contentEditable = 'true';
+        descEditor.innerHTML = issue.description || '';
+        descEditor.style.minHeight = '80px';
+        descEditor.style.width = '100%';
+        descEditor.style.padding = '8px';
+        descEditor.style.marginBottom = '6px';
+        descEditor.style.background = '#111827';
+        descEditor.style.color = '#e5e7eb';
+        descEditor.style.border = '1px solid #374151';
+        descEditor.style.borderRadius = '4px';
+        descEditor.style.overflowY = 'auto';
+        descEditor.style.fontSize = '11px';
+        descEditor.style.lineHeight = '1.5';
+        descEditor.addEventListener('input', () => {
+          issue.description = descEditor.innerHTML;
+        });
+        descEditor.addEventListener('blur', () => {
+          issue.description = descEditor.innerHTML;
+        });
+        // Prevent space from toggling pan mode
+        descEditor.addEventListener('keydown', (e) => {
+          e.stopPropagation();
+        });
+        descEditor.addEventListener('keyup', (e) => {
+          e.stopPropagation();
+        });
+        descEditor.addEventListener('keypress', (e) => {
+          e.stopPropagation();
+        });
+        issueCard.appendChild(descEditor);
 
         // İmalat Türü, Durum, Öncelik satırı
         const metaRow = document.createElement('div');
@@ -1054,6 +1309,256 @@
         });
         addPhotoLabel.appendChild(addPhotoInput);
         issueCard.appendChild(addPhotoLabel);
+        
+        // NCR FIELDS SECTION
+        const ncrSection = document.createElement('div');
+        ncrSection.style.marginTop = '12px';
+        ncrSection.style.padding = '8px';
+        ncrSection.style.background = '#111827';
+        ncrSection.style.borderRadius = '4px';
+        ncrSection.style.border = '1px solid #374151';
+        
+        const ncrTitle = document.createElement('div');
+        ncrTitle.style.fontSize = '11px';
+        ncrTitle.style.fontWeight = '600';
+        ncrTitle.style.marginBottom = '8px';
+        ncrTitle.style.color = '#93c5fd';
+        ncrTitle.textContent = '📋 NCR BİLGİLERİ';
+        ncrSection.appendChild(ncrTitle);
+        
+        // NCR Type + Number row
+        const ncrRow1 = document.createElement('div');
+        ncrRow1.style.display = 'grid';
+        ncrRow1.style.gridTemplateColumns = '2fr 1fr';
+        ncrRow1.style.gap = '6px';
+        ncrRow1.style.marginBottom = '6px';
+        
+        // NCR Type
+        const ncrTypeDiv = document.createElement('div');
+        const ncrTypeLabel = document.createElement('label');
+        ncrTypeLabel.textContent = 'Uygunsuzluk Tipi';
+        ncrTypeLabel.style.fontSize = '10px';
+        ncrTypeLabel.style.fontWeight = '600';
+        ncrTypeLabel.style.color = '#d1d5db';
+        ncrTypeLabel.style.display = 'block';
+        ncrTypeLabel.style.marginBottom = '2px';
+        ncrTypeDiv.appendChild(ncrTypeLabel);
+        const ncrTypeSelect = document.createElement('select');
+        ncrTypeSelect.style.width = '100%';
+        if (!ns.NCR_TYPES) {
+          ns.NCR_TYPES = [
+            { code: 'STC', label: 'Structural' },
+            { code: 'ARC', label: 'Architectural' },
+            { code: 'İSG', label: 'İş Güvenliği' },
+            { code: 'ELK', label: 'Electrical' },
+            { code: 'MEK', label: 'Mechanical' }
+          ];
+        }
+        ns.NCR_TYPES.forEach(type => {
+          const opt = document.createElement('option');
+          opt.value = type.code;
+          opt.textContent = type.label + ' (' + type.code + ')';
+          ncrTypeSelect.appendChild(opt);
+        });
+        ncrTypeSelect.value = issue.ncrType || 'STC';
+        ncrTypeSelect.addEventListener('change', () => {
+          issue.ncrType = ncrTypeSelect.value;
+        });
+        ncrTypeDiv.appendChild(ncrTypeSelect);
+        ncrRow1.appendChild(ncrTypeDiv);
+        
+        // NCR Number
+        const ncrNumberDiv = document.createElement('div');
+        const ncrNumberLabel = document.createElement('label');
+        ncrNumberLabel.textContent = 'NCR No';
+        ncrNumberLabel.style.fontSize = '10px';
+        ncrNumberLabel.style.fontWeight = '600';
+        ncrNumberLabel.style.color = '#d1d5db';
+        ncrNumberLabel.style.display = 'block';
+        ncrNumberLabel.style.marginBottom = '2px';
+        ncrNumberDiv.appendChild(ncrNumberLabel);
+        const ncrNumberInput = document.createElement('input');
+        ncrNumberInput.type = 'number';
+        ncrNumberInput.min = '1';
+        ncrNumberInput.max = '999';
+        ncrNumberInput.value = issue.ncrNumber || 1;
+        ncrNumberInput.style.width = '100%';
+        ncrNumberInput.addEventListener('input', () => {
+          issue.ncrNumber = parseInt(ncrNumberInput.value) || 1;
+        });
+        ncrNumberDiv.appendChild(ncrNumberInput);
+        ncrRow1.appendChild(ncrNumberDiv);
+        
+        ncrSection.appendChild(ncrRow1);
+        
+        // LOCATION PATTERN SECTION
+        const locationLabel = document.createElement('label');
+        locationLabel.textContent = 'Konum Bilgisi';
+        locationLabel.style.fontSize = '10px';
+        locationLabel.style.fontWeight = '600';
+        locationLabel.style.color = '#d1d5db';
+        locationLabel.style.display = 'block';
+        locationLabel.style.marginTop = '6px';
+        locationLabel.style.marginBottom = '2px';
+        ncrSection.appendChild(locationLabel);
+        
+        const locationSelect = document.createElement('select');
+        locationSelect.style.width = '100%';
+        locationSelect.style.marginBottom = '6px';
+        
+        // Get allowed patterns based on ADA number (business rules)
+        const allowedPatterns = ns.getAllowedLocationPatterns(hs.ada);
+        const locationOptions = [];
+        
+        // Build options based on allowed patterns and available data
+        allowedPatterns.forEach(patternId => {
+          const pattern = ns.NCR_LOCATION_PATTERNS[patternId];
+          if (!pattern) return;
+          
+          // Check if we have required data for this pattern
+          const hasRequiredData = pattern.requires.every(field => {
+            return hs[field] && String(hs[field]).trim() !== '';
+          });
+          
+          if (hasRequiredData) {
+            // Build dynamic label with actual values
+            let label = pattern.label;
+            label = label.replace('<X>', hs.ada || '');
+            label = label.replace('<Y>', hs.parsel || '');
+            label = label.replace('<BLOK>', hs.blok || '');
+            label = label.replace('<BLOCK>', hs.blok || '');
+            
+            locationOptions.push({
+              pattern: patternId,
+              label: label
+            });
+          }
+        });
+        
+        // If no location data, add default option
+        if (locationOptions.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'Konum bilgisi girilmemiş';
+          locationSelect.appendChild(opt);
+          locationSelect.disabled = true;
+        } else {
+          locationOptions.forEach(option => {
+            const opt = document.createElement('option');
+            opt.value = option.pattern;
+            opt.textContent = option.label;
+            locationSelect.appendChild(opt);
+          });
+          
+          // Set initial value or default to most detailed available
+          if (!issue.locationPattern || !allowedPatterns.includes(issue.locationPattern)) {
+            // Default to most detailed available pattern
+            issue.locationPattern = locationOptions[locationOptions.length - 1].pattern;
+          }
+          locationSelect.value = issue.locationPattern;
+          
+          locationSelect.addEventListener('change', () => {
+            issue.locationPattern = locationSelect.value;
+          });
+        }
+        
+        ncrSection.appendChild(locationSelect);
+        
+        // Control Engineer
+        const engineerLabel = document.createElement('label');
+        engineerLabel.textContent = 'Kontrol Mühendisi';
+        engineerLabel.style.fontSize = '10px';
+        engineerLabel.style.fontWeight = '600';
+        engineerLabel.style.color = '#d1d5db';
+        engineerLabel.style.display = 'block';
+        engineerLabel.style.marginTop = '6px';
+        engineerLabel.style.marginBottom = '2px';
+        ncrSection.appendChild(engineerLabel);
+        
+        const engineerRow = document.createElement('div');
+        engineerRow.style.display = 'grid';
+        engineerRow.style.gridTemplateColumns = '2fr 1fr';
+        engineerRow.style.gap = '6px';
+        engineerRow.style.marginBottom = '6px';
+        
+        const engineerNameInput = document.createElement('input');
+        engineerNameInput.type = 'text';
+        engineerNameInput.placeholder = 'Adı Soyadı';
+        engineerNameInput.value = issue.controlEngineerName || '';
+        engineerNameInput.style.width = '100%';
+        engineerNameInput.addEventListener('input', () => {
+          issue.controlEngineerName = engineerNameInput.value;
+        });
+        engineerRow.appendChild(engineerNameInput);
+        
+        const engineerDateInput = document.createElement('input');
+        engineerDateInput.type = 'date';
+        engineerDateInput.value = issue.controlEngineerDate || '';
+        engineerDateInput.style.width = '100%';
+        engineerDateInput.addEventListener('change', () => {
+          issue.controlEngineerDate = engineerDateInput.value;
+        });
+        engineerRow.appendChild(engineerDateInput);
+        
+        ncrSection.appendChild(engineerRow);
+        
+        // Control Chief
+        const chiefLabel = document.createElement('label');
+        chiefLabel.textContent = 'Kontrol Şefi';
+        chiefLabel.style.fontSize = '10px';
+        chiefLabel.style.fontWeight = '600';
+        chiefLabel.style.color = '#d1d5db';
+        chiefLabel.style.display = 'block';
+        chiefLabel.style.marginBottom = '2px';
+        ncrSection.appendChild(chiefLabel);
+        
+        const chiefRow = document.createElement('div');
+        chiefRow.style.display = 'grid';
+        chiefRow.style.gridTemplateColumns = '2fr 1fr';
+        chiefRow.style.gap = '6px';
+        chiefRow.style.marginBottom = '6px';
+        
+        const chiefNameInput = document.createElement('input');
+        chiefNameInput.type = 'text';
+        chiefNameInput.placeholder = 'Adı Soyadı';
+        chiefNameInput.value = issue.controlChiefName || '';
+        chiefNameInput.style.width = '100%';
+        chiefNameInput.addEventListener('input', () => {
+          issue.controlChiefName = chiefNameInput.value;
+        });
+        chiefRow.appendChild(chiefNameInput);
+        
+        const chiefDateInput = document.createElement('input');
+        chiefDateInput.type = 'date';
+        chiefDateInput.value = issue.controlChiefDate || '';
+        chiefDateInput.style.width = '100%';
+        chiefDateInput.addEventListener('change', () => {
+          issue.controlChiefDate = chiefDateInput.value;
+        });
+        chiefRow.appendChild(chiefDateInput);
+        
+        ncrSection.appendChild(chiefRow);
+        
+        // Convert to NCR button
+        const ncrExportBtn = document.createElement('button');
+        ncrExportBtn.textContent = '📋 NCR\'a Dönüştür ve Excel\'e Aktar';
+        ncrExportBtn.style.width = '100%';
+        ncrExportBtn.style.padding = '6px 12px';
+        ncrExportBtn.style.fontSize = '11px';
+        ncrExportBtn.style.background = '#2563eb';
+        ncrExportBtn.style.color = '#fff';
+        ncrExportBtn.style.border = 'none';
+        ncrExportBtn.style.borderRadius = '4px';
+        ncrExportBtn.style.cursor = 'pointer';
+        ncrExportBtn.style.marginTop = '4px';
+        ncrExportBtn.addEventListener('click', () => {
+          if (typeof ns.exportIssueToNcrExcel === 'function') {
+            ns.exportIssueToNcrExcel(hs.id, issue.id);
+          }
+        });
+        ncrSection.appendChild(ncrExportBtn);
+        
+        issueCard.appendChild(ncrSection);
 
         // Sorun silme butonu
         const deleteIssueBtn = document.createElement('button');
@@ -1071,7 +1576,7 @@
         });
         issueCard.appendChild(deleteIssueBtn);
 
-        issuesSection.appendChild(issueCard);
+        issuesContent.appendChild(issueCard);
       });
     }
 
@@ -1245,23 +1750,36 @@
     header.appendChild(closeBtn);
     sec.appendChild(header);
 
-    // Başlayabilir imalatları topla
-    const readyItems = [];
+    // Başlayabilir imalatları imalat türüne göre grupla
+    const readyByWorkType = {};
+    
     ns.state.hotspots.forEach(hs => {
       if (!hs.works) return;
       ALL_WORK_ITEMS.forEach(w => {
         const work = hs.works[w.id];
         if (work && work.status === 'baslayabilir') {
-          readyItems.push({
+          if (!readyByWorkType[w.id]) {
+            readyByWorkType[w.id] = {
+              workItem: w,
+              items: []
+            };
+          }
+          readyByWorkType[w.id].items.push({
             hotspot: hs,
-            workItem: w,
             work: work
           });
         }
       });
     });
 
-    if (readyItems.length === 0) {
+    const workTypeIds = Object.keys(readyByWorkType);
+    
+    // WORK_GROUPS sıralamasına göre sırala
+    const sortedWorkTypeIds = ALL_WORK_ITEMS
+      .map(w => w.id)
+      .filter(id => workTypeIds.includes(id));
+    
+    if (sortedWorkTypeIds.length === 0) {
       const empty = document.createElement('div');
       empty.style.textAlign = 'center';
       empty.style.padding = '20px';
@@ -1269,66 +1787,194 @@
       empty.textContent = 'Başlayabilir durumda imalat bulunmuyor.';
       sec.appendChild(empty);
     } else {
-      // Sayaç
+      // Toplam sayaç
+      let totalCount = 0;
+      sortedWorkTypeIds.forEach(id => {
+        totalCount += readyByWorkType[id].items.length;
+      });
+      
       const countDiv = document.createElement('div');
       countDiv.style.fontSize = '11px';
       countDiv.style.color = '#9ca3af';
       countDiv.style.marginBottom = '10px';
-      countDiv.textContent = `Toplam ${readyItems.length} imalat başlayabilir durumda`;
+      countDiv.textContent = `Toplam ${totalCount} imalat, ${sortedWorkTypeIds.length} kalemde başlayabilir durumda`;
       sec.appendChild(countDiv);
 
-      // İmalat kartları
-      readyItems.forEach(item => {
-        const card = document.createElement('div');
-        card.style.background = '#1f2937';
-        card.style.border = '1px solid #3b82f6';
-        card.style.borderRadius = '6px';
-        card.style.padding = '10px';
-        card.style.marginBottom = '8px';
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', () => {
-          ns.state.showReadyPanel = false;
-          ns.state.selectedIds = new Set([item.hotspot.id]);
-          ns.state.highlightWorkTypeId = item.workItem.id;
+      // Her imalat türü için grup oluştur
+      sortedWorkTypeIds.forEach(workTypeId => {
+        const group = readyByWorkType[workTypeId];
+        
+        // Grup başlığı
+        const groupHeader = document.createElement('div');
+        groupHeader.style.background = '#1e3a5f';
+        groupHeader.style.border = '1px solid #3b82f6';
+        groupHeader.style.borderRadius = '6px';
+        groupHeader.style.padding = '8px 10px';
+        groupHeader.style.marginBottom = '6px';
+        groupHeader.style.display = 'flex';
+        groupHeader.style.justifyContent = 'space-between';
+        groupHeader.style.alignItems = 'center';
+        
+        const groupTitle = document.createElement('div');
+        groupTitle.style.fontWeight = '600';
+        groupTitle.style.fontSize = '12px';
+        groupTitle.style.color = '#93c5fd';
+        groupTitle.innerHTML = `▷ ${group.workItem.label}`;
+        groupHeader.appendChild(groupTitle);
+        
+        // Sağ taraf: Excel butonu + blok sayısı
+        const rightSide = document.createElement('div');
+        rightSide.style.display = 'flex';
+        rightSide.style.alignItems = 'center';
+        rightSide.style.gap = '8px';
+        
+        // Excel export butonu
+        const excelBtn = document.createElement('button');
+        excelBtn.innerHTML = '📥';
+        excelBtn.style.background = '#16a34a';
+        excelBtn.style.border = 'none';
+        excelBtn.style.color = '#fff';
+        excelBtn.style.padding = '2px 6px';
+        excelBtn.style.borderRadius = '4px';
+        excelBtn.style.cursor = 'pointer';
+        excelBtn.style.fontSize = '12px';
+        excelBtn.title = 'Excel\'e Aktar';
+        excelBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
           
-          // Butonu untoggle et
-          const { readyBtn } = ns.dom;
-          if (readyBtn) readyBtn.classList.remove('toggle-active');
+          if (typeof XLSXPatcher === 'undefined') {
+            alert('XLSXPatcher yüklenemedi.');
+            return;
+          }
           
-          ns.renderHotspots();
-          ns.renderSidePanel();
+          try {
+            // Template'i yükle
+            const response = await fetch('./data/baslayabilir.xlsx');
+            if (!response.ok) {
+              throw new Error('Şablon yüklenemedi (HTTP ' + response.status + ')');
+            }
+            
+            const templateBlob = await response.blob();
+            
+            // Blokları sırala
+            const sortedItems = [...group.items].sort((a, b) => {
+              const aLabel = ns.buildHotspotLabel(a.hotspot);
+              const bLabel = ns.buildHotspotLabel(b.hotspot);
+              return aLabel.localeCompare(bLabel, 'tr');
+            });
+            
+            // Data hazırla
+            const data = sortedItems.map(item => ({
+              ADA: parseInt(item.hotspot.ada) || 0,
+              PARSEL: parseInt(item.hotspot.parsel) || 0,
+              blokAdi: item.hotspot.blok || ''
+            }));
+            
+            // Header bilgileri
+            const headerInfo = {
+              projectName: ns.state.projectInfo?.name || '<PROJE ADI>',
+              date: new Date(),
+              imalatTuru: group.workItem.label.toUpperCase()
+            };
+            
+            // Patch
+            const patcher = new XLSXPatcher();
+            const blob = await patcher.patch(templateBlob, data, headerInfo);
+            
+            // İndir
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Baslayabilir_${group.workItem.id}_${dd}${mm}${yyyy}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+          } catch (err) {
+            console.error('Excel export hatası:', err);
+            alert('Excel oluşturulamadı.\n\nHata: ' + err.message);
+          }
         });
+        rightSide.appendChild(excelBtn);
+        
+        const groupCount = document.createElement('span');
+        groupCount.style.fontSize = '11px';
+        groupCount.style.color = '#60a5fa';
+        groupCount.style.background = 'rgba(59, 130, 246, 0.2)';
+        groupCount.style.padding = '2px 8px';
+        groupCount.style.borderRadius = '999px';
+        groupCount.textContent = `${group.items.length} blok`;
+        rightSide.appendChild(groupCount);
+        
+        groupHeader.appendChild(rightSide);
+        
+        sec.appendChild(groupHeader);
+        
+        // Blokları ada, parsel, blok sırasına göre sırala
+        group.items.sort((a, b) => {
+          const aLabel = ns.buildHotspotLabel(a.hotspot);
+          const bLabel = ns.buildHotspotLabel(b.hotspot);
+          return aLabel.localeCompare(bLabel, 'tr');
+        });
+        
+        // Blok listesi container
+        const itemsContainer = document.createElement('div');
+        itemsContainer.style.marginBottom = '12px';
+        itemsContainer.style.paddingLeft = '8px';
+        
+        // Blok kartları
+        group.items.forEach(item => {
+          const card = document.createElement('div');
+          card.style.background = '#1f2937';
+          card.style.border = '1px solid #374151';
+          card.style.borderLeft = '3px solid #3b82f6';
+          card.style.borderRadius = '4px';
+          card.style.padding = '8px 10px';
+          card.style.marginBottom = '4px';
+          card.style.cursor = 'pointer';
+          card.style.display = 'flex';
+          card.style.justifyContent = 'space-between';
+          card.style.alignItems = 'center';
+          
+          card.addEventListener('click', () => {
+            ns.state.showReadyPanel = false;
+            ns.state.selectedIds = new Set([item.hotspot.id]);
+            ns.state.highlightWorkTypeId = group.workItem.id;
+            
+            // Butonu untoggle et
+            const { readyBtn } = ns.dom;
+            if (readyBtn) readyBtn.classList.remove('toggle-active');
+            
+            ns.renderHotspots();
+            ns.renderSidePanel();
+          });
 
-        // Blok adı
-        const blockName = document.createElement('div');
-        blockName.style.fontWeight = '600';
-        blockName.style.fontSize = '12px';
-        blockName.style.color = '#e5e7eb';
-        blockName.style.marginBottom = '4px';
-        blockName.textContent = ns.buildHotspotLabel(item.hotspot);
-        card.appendChild(blockName);
+          // Blok adı
+          const blockName = document.createElement('div');
+          blockName.style.fontSize = '12px';
+          blockName.style.color = '#e5e7eb';
+          blockName.textContent = ns.buildHotspotLabel(item.hotspot);
+          card.appendChild(blockName);
 
-        // İmalat adı
-        const workName = document.createElement('div');
-        workName.style.fontSize = '11px';
-        workName.style.color = '#3b82f6';
-        workName.style.display = 'flex';
-        workName.style.alignItems = 'center';
-        workName.style.gap = '4px';
-        workName.innerHTML = `<span style="font-size: 14px;">▷</span> ${item.workItem.label}`;
-        card.appendChild(workName);
+          // Alt yüklenici varsa göster
+          if (item.work.subcontractor && item.work.subcontractor.trim()) {
+            const subDiv = document.createElement('div');
+            subDiv.style.fontSize = '10px';
+            subDiv.style.color = '#9ca3af';
+            subDiv.textContent = item.work.subcontractor.trim();
+            card.appendChild(subDiv);
+          }
 
-        // Alt yüklenici varsa göster
-        if (item.work.subcontractor && item.work.subcontractor.trim()) {
-          const subDiv = document.createElement('div');
-          subDiv.style.fontSize = '10px';
-          subDiv.style.color = '#9ca3af';
-          subDiv.style.marginTop = '4px';
-          subDiv.textContent = `Alt yüklenici: ${item.work.subcontractor}`;
-          card.appendChild(subDiv);
-        }
-
-        sec.appendChild(card);
+          itemsContainer.appendChild(card);
+        });
+        
+        sec.appendChild(itemsContainer);
       });
     }
 
@@ -1547,8 +2193,11 @@
           descDiv.style.marginBottom = '6px';
           descDiv.style.overflow = 'hidden';
           descDiv.style.textOverflow = 'ellipsis';
-          descDiv.style.whiteSpace = 'nowrap';
-          descDiv.textContent = item.issue.description.trim();
+          descDiv.style.display = '-webkit-box';
+          descDiv.style.webkitLineClamp = '2'; // Show max 2 lines
+          descDiv.style.webkitBoxOrient = 'vertical';
+          descDiv.style.lineHeight = '1.5';
+          descDiv.innerHTML = item.issue.description.trim(); // Render HTML formatting
           card.appendChild(descDiv);
         }
 
@@ -1600,6 +2249,27 @@
         }
 
         card.appendChild(metaDiv);
+        
+        // Convert to NCR button
+        const ncrButton = document.createElement('button');
+        ncrButton.textContent = '📋 NCR\'a Dönüştür';
+        ncrButton.style.marginTop = '8px';
+        ncrButton.style.padding = '6px 12px';
+        ncrButton.style.background = '#2563eb';
+        ncrButton.style.color = '#fff';
+        ncrButton.style.border = 'none';
+        ncrButton.style.borderRadius = '4px';
+        ncrButton.style.fontSize = '11px';
+        ncrButton.style.cursor = 'pointer';
+        ncrButton.style.width = '100%';
+        ncrButton.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent card click
+          if (typeof ns.exportIssueToNcrExcel === 'function') {
+            ns.exportIssueToNcrExcel(item.hotspot.id, item.issue.id);
+          }
+        });
+        card.appendChild(ncrButton);
+        
         listContainer.appendChild(card);
       });
     }
