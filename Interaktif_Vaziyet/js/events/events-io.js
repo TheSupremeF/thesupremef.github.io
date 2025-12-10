@@ -23,7 +23,7 @@
       const zip = new JSZip();
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
-      const fileName = 'site-plan-' + ns.state.projectInfo.contractorShort +'-'+
+      const fileName = 'site-plan-' +
         now.getFullYear() +
         pad(now.getMonth() + 1) +
         pad(now.getDate()) + '-' +
@@ -123,7 +123,8 @@
           floorCount: typeof hs.floorCount === 'number' ? hs.floorCount : 0,
           buildingType: typeof hs.buildingType === 'string' ? hs.buildingType : '',
           dailyRecords: Array.isArray(hs.dailyRecords) ? hs.dailyRecords : [],
-          issues: issuesClean
+          issues: issuesClean,
+          labelOffset: hs.labelOffset || null
         });
       });
 
@@ -264,6 +265,7 @@
             const buildingType = typeof h.buildingType === 'string' ? h.buildingType : '';
             const dailyRecords = Array.isArray(h.dailyRecords) ? h.dailyRecords : [];
             const issues = Array.isArray(h.issues) ? h.issues : [];
+            const labelOffset = h.labelOffset || null;
 
             return {
               id: h.id,
@@ -285,7 +287,8 @@
               floorCount,
               buildingType,
               dailyRecords,
-              issues
+              issues,
+              labelOffset
             };
           });
 

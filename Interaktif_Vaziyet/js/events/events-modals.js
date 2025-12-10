@@ -288,26 +288,27 @@
         }
       });
 
-settingsSave.addEventListener('click', () => {
-  const gridSize = gridSizeInput ? parseInt(gridSizeInput.value) || 100 : 100;
-  const labelFontSize = labelFontSizeInput ? parseInt(labelFontSizeInput.value) || 12 : 12;
-  const labelOffsetX = labelOffsetXInput ? parseInt(labelOffsetXInput.value) || 0 : 0;
-  const labelOffsetY = labelOffsetYInput ? parseInt(labelOffsetYInput.value) || -20 : -20;
-  
-  // Sınırları kontrol et
-  ns.state.settings = {
-    gridSize: Math.max(25, Math.min(200, gridSize)),
-    labelFontSize: Math.max(4, Math.min(24, labelFontSize)), // 5-24px arası
-    labelOffsetX: Math.max(-100, Math.min(100, labelOffsetX)),
-    labelOffsetY: Math.max(-100, Math.min(100, labelOffsetY))
-  };
-  
-  // Grid değişirse hotspot'ları yeniden render et
-  ns.renderHotspots();
-  ns.renderSidePanel();
-  
-  settingsOverlay.style.display = 'none';
-});    }
+      settingsSave.addEventListener('click', () => {
+        const gridSize = gridSizeInput ? parseInt(gridSizeInput.value) || 100 : 100;
+        const labelFontSize = labelFontSizeInput ? parseInt(labelFontSizeInput.value) || 12 : 12;
+        const labelOffsetX = labelOffsetXInput ? parseInt(labelOffsetXInput.value) || 0 : 0;
+        const labelOffsetY = labelOffsetYInput ? parseInt(labelOffsetYInput.value) || -20 : -20;
+        
+        // Sınırları kontrol et
+        ns.state.settings = {
+          gridSize: Math.max(25, Math.min(200, gridSize)),
+          labelFontSize: Math.max(8, Math.min(24, labelFontSize)),
+          labelOffsetX: Math.max(-100, Math.min(100, labelOffsetX)),
+          labelOffsetY: Math.max(-100, Math.min(100, labelOffsetY))
+        };
+        
+        // Grid değişirse hotspot'ları yeniden render et
+        ns.renderHotspots();
+        ns.renderSidePanel();
+        
+        settingsOverlay.style.display = 'none';
+      });
+    }
   }
 
   ns.wireOverlays = wireOverlays;
