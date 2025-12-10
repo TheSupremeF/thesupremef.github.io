@@ -23,7 +23,7 @@
       const zip = new JSZip();
       const now = new Date();
       const pad = n => String(n).padStart(2, '0');
-      const fileName = 'site-plan-' +
+      const fileName = 'site-plan-' + ns.state.projectInfo.contractorShort +'-'
         now.getFullYear() +
         pad(now.getMonth() + 1) +
         pad(now.getDate()) + '-' +
@@ -41,7 +41,8 @@
         texts: ns.state.texts || [],
         exportedAt: now.toISOString(),
         editorPassword: ns.state.editorPassword || '',
-        projectInfo: ns.state.projectInfo || null
+        projectInfo: ns.state.projectInfo || null,
+        settings: ns.state.settings || null
       };
 
       const mainParts = dataUrlToParts(ns.state.mainImageUrl);
@@ -198,6 +199,15 @@
             formworkType: 'TÜNEL',
             maxFloors: 10,
             ...(cfg.projectInfo || {})
+          };
+          
+          // settings'i default değerlerle merge et
+          ns.state.settings = {
+            gridSize: 100,
+            labelFontSize: 12,
+            labelOffsetX: 0,
+            labelOffsetY: -20,
+            ...(cfg.settings || {})
           };
           
           // Kat sayısı varsa WORK_GROUPS'u yeniden oluştur

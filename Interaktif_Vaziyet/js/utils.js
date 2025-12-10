@@ -2,8 +2,16 @@
   ns.utils = ns.utils || {};
 
   ns.utils.snapPercent = function(val){
-    const g = ns.state && ns.state.grid ? ns.state.grid : 1;
-    return Math.round(val / g) * g;
+    // Grid snap hassasiyetini settings'ten al
+    const settings = ns.state && ns.state.settings ? ns.state.settings : {};
+    const gridSize = settings.gridSize || 100;
+    const baseGrid = ns.state && ns.state.grid ? ns.state.grid : 1;
+    
+    // gridSize yüzdesi kadar snap hassasiyeti
+    // 100% = normal, 50% = daha hassas (daha küçük grid), 200% = daha gevşek
+    const effectiveGrid = baseGrid * (gridSize / 100);
+    
+    return Math.round(val / effectiveGrid) * effectiveGrid;
   };
 
   ns.utils.hexToRgba = function(hex, alpha) {

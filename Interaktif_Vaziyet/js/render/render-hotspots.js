@@ -59,6 +59,25 @@
         const label = document.createElement('div');
         label.className = 'hotspot-label';
         label.textContent = ns.buildHotspotLabel(h);
+        label.dataset.id = h.id;
+        
+        // Ayarlardan default label stilini al
+        const settings = ns.state.settings || {};
+        const fontSize = settings.labelFontSize || 12;
+        const defaultOffsetX = settings.labelOffsetX || 0;
+        const defaultOffsetY = settings.labelOffsetY || -20;
+        
+        // Hotspot'un kendi labelOffset'i varsa onu kullan, yoksa default
+        const offsetX = h.labelOffset ? h.labelOffset.x : defaultOffsetX;
+        const offsetY = h.labelOffset ? h.labelOffset.y : defaultOffsetY;
+        
+        label.style.fontSize = fontSize + 'px';
+        label.style.left = '50%';
+        label.style.top = '0';
+        label.style.transform = `translate(calc(-50% + ${offsetX}px), ${offsetY}px)`;
+        label.style.cursor = ns.state.mode === 'editor' ? 'move' : 'default';
+        label.style.userSelect = 'none';
+        
         el.appendChild(label);
       }
 

@@ -31,6 +31,12 @@
       formworkType: 'TÜNEL', // Default: TÜNEL, KONVANSİYONEL, HİBRİT
       maxFloors: 10 // Default: 10 kat
     },
+    settings: {
+      gridSize: 100, // Grid snap hassasiyeti (%)
+      labelFontSize: 12, // Etiket yazı boyutu (px)
+      labelOffsetX: 0, // Etiket X kaydırma (px)
+      labelOffsetY: -20 // Etiket Y kaydırma (px) - default blok üstünde
+    },
     selectedDate: new Date().toISOString().split('T')[0],
     drawMode: null
   };
@@ -106,7 +112,8 @@
       floorCount: typeof params.floorCount === 'number' ? params.floorCount : 0,
       buildingType: typeof params.buildingType === 'string' ? params.buildingType : '',
       dailyRecords: Array.isArray(params.dailyRecords) ? params.dailyRecords : [],
-      issues: Array.isArray(params.issues) ? params.issues : []
+      issues: Array.isArray(params.issues) ? params.issues : [],
+      labelOffset: params.labelOffset || null // Her hotspot için özel label pozisyonu {x, y}
     };
 
     ns.state.hotspots.push(hotspot);
@@ -148,6 +155,7 @@
       detailImages: original.detailImages ? JSON.parse(JSON.stringify(original.detailImages)) : [],
       dailyRecords: original.dailyRecords ? JSON.parse(JSON.stringify(original.dailyRecords)) : [],
       issues: original.issues ? JSON.parse(JSON.stringify(original.issues)) : [],
+      labelOffset: original.labelOffset ? JSON.parse(JSON.stringify(original.labelOffset)) : null,
       
       // Works için özel deep clone
       works: {}

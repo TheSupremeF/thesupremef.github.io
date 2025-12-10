@@ -36,6 +36,13 @@
       <span class="material-symbols-outlined">vpn_key</span>
     </button>
 
+    <button id="settingsBtn"
+            class="icon-top-button"
+            title="Ayarlar"
+            style="display:none">
+      <span class="material-symbols-outlined">settings</span>
+    </button>
+
     <div class="mode-toggle" id="modeToggle">
       <button data-mode="viewer" class="active">Görüntüle</button>
       <button data-mode="editor">Düzenle</button>
@@ -208,6 +215,42 @@
         <button id="projectInfoSave">Kaydet</button>
       </div>
       <p class="hint">Bu bilgiler EPP içindeki config.json'da düz metin olarak saklanır.</p>
+    </div>
+  </div>
+
+  <!-- Ayarlar -->
+  <div id="settingsOverlay" class="modal-backdrop">
+    <div class="modal-dialog">
+      <h2>⚙️ Ayarlar</h2>
+      <p>Grid ve etiket ayarlarını yapılandırabilirsin.</p>
+      
+      <h3 style="margin-top:16px;font-size:14px;color:#e5e7eb;">🔲 Grid Ayarları</h3>
+      <label for="gridSizeInput" style="margin-top:8px;">Grid Boyutu (%)</label>
+      <input type="number" id="gridSizeInput" min="25" max="200" step="25" placeholder="100" 
+             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+      <p class="hint">Grid snap hassasiyetini ayarlar. Küçük değer = daha çok grid. (25-200% arası)</p>
+      
+      <h3 style="margin-top:16px;font-size:14px;color:#e5e7eb;">🏷️ Etiket Ayarları</h3>
+      <label for="labelFontSizeInput" style="margin-top:8px;">Etiket Boyutu (px)</label>
+      <input type="number" id="labelFontSizeInput" min="4" max="24" placeholder="12" 
+             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+      <p class="hint">Blok etiketlerinin yazı boyutu. (4-24px arası)</p>
+      
+      <label for="labelOffsetXInput" style="margin-top:8px;">Etiket X Kaydırma (px)</label>
+      <input type="number" id="labelOffsetXInput" min="-100" max="100" placeholder="0" 
+             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+      <p class="hint">Etiketlerin yatay pozisyonu. (-100 ile +100 arası)</p>
+      
+      <label for="labelOffsetYInput" style="margin-top:8px;">Etiket Y Kaydırma (px)</label>
+      <input type="number" id="labelOffsetYInput" min="-100" max="100" placeholder="0" 
+             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+      <p class="hint">Etiketlerin dikey pozisyonu. (-100 ile +100 arası)</p>
+      
+      <div class="modal-actions" style="margin-top:16px;">
+        <button id="settingsCancel">Vazgeç</button>
+        <button id="settingsSave">Kaydet</button>
+      </div>
+      <p class="hint">Ayarlar EPP içindeki config.json'da saklanır.</p>
     </div>
   </div>
 

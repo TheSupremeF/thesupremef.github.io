@@ -51,7 +51,7 @@
   ns.applyMode = function(newMode) {
     ns.state.mode = newMode;
     ns.updateModeToggleUI();
-    const { mainImageWrapper, passwordSettingsBtn, projectInfoBtn } = ns.dom || {};
+    const { mainImageWrapper, passwordSettingsBtn, projectInfoBtn, settingsBtn } = ns.dom || {};
     const drawToolbar = document.getElementById('drawToolbar');
     
     if (mainImageWrapper) {
@@ -65,6 +65,9 @@
     }
     if (projectInfoBtn) {
       projectInfoBtn.style.display = newMode === 'editor' ? 'inline-flex' : 'none';
+    }
+    if (settingsBtn) {
+      settingsBtn.style.display = newMode === 'editor' ? 'inline-flex' : 'none';
     }
     ns.renderHotspots();
     ns.renderSidePanel();

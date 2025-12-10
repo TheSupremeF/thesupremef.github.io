@@ -48,6 +48,7 @@
       projectContractorInput: document.getElementById('projectContractorInput'),
       projectInfoCancel: document.getElementById('projectInfoCancel'),
       projectInfoSave: document.getElementById('projectInfoSave'),
+      settingsBtn: document.getElementById('settingsBtn'),
       addBlockBtn: document.getElementById('addBlockBtn'),
       drawLineBtn: document.getElementById('drawLineBtn'),
       drawCurveBtn: document.getElementById('drawCurveBtn'),
@@ -179,6 +180,7 @@
     ns.wireOverlays();
     ns.wirePasswordOverlays();
     ns.wireProjectInfoOverlay();
+    ns.wireSettingsOverlay();
     ns.wireToolbarButtons();
     ns.wireMainImageLoad();
     ns.wireExportImport();

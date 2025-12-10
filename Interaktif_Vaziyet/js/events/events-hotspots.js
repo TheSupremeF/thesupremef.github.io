@@ -336,6 +336,50 @@
         return;
       }
 
+      // Label dragging (Editor modda)
+      const labelEl = e.target.closest('.hotspot-label');
+      if (labelEl && ns.state.mode === 'editor') {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const hotspotId = labelEl.dataset.id;
+        const hs = ns.getHotspot(hotspotId);
+        if (!hs) return;
+        
+        const settings = ns.state.settings || {};
+        const defaultOffsetX = settings.labelOffsetX || 0;
+        const defaultOffsetY = settings.labelOffsetY || -20;
+        
+        // Mevcut offset'i al
+        const currentOffsetX = hs.labelOffset ? hs.labelOffset.x : defaultOffsetX;
+        const currentOffsetY = hs.labelOffset ? hs.labelOffset.y : defaultOffsetY;
+        
+        const startMouseX = e.clientX;
+        const startMouseY = e.clientY;
+        
+        const onMouseMove = (moveEvent) => {
+          const dx = (moveEvent.clientX - startMouseX) / ns.state.scale;
+          const dy = (moveEvent.clientY - startMouseY) / ns.state.scale;
+          
+          hs.labelOffset = {
+            x: Math.round(currentOffsetX + dx),
+            y: Math.round(currentOffsetY + dy)
+          };
+          
+          ns.renderHotspots();
+        };
+        
+        const onMouseUp = () => {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          ns.pushHistory('moveLabelOffset');
+        };
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        return;
+      }
+
       if (ns.state.mode !== 'editor') {
         const hotspotEl = e.target.closest('.hotspot');
         if (!hotspotEl) return;
