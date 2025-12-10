@@ -187,7 +187,23 @@
           ns.state.grid = cfg.grid || 1;
           ns.state.editorPassword = typeof cfg.editorPassword === 'string' ? cfg.editorPassword : '';
           ns.state.editorUnlocked = !ns.state.editorPassword;
-          ns.state.projectInfo = cfg.projectInfo || { name: '', contractor: '' };
+          
+          // projectInfo'yu default değerlerle merge et
+          ns.state.projectInfo = {
+            name: '',
+            contractor: '',
+            contractorCode: '',
+            contractorShort: '',
+            projectType: 'ETAP',
+            formworkType: 'TÜNEL',
+            maxFloors: 10,
+            ...(cfg.projectInfo || {})
+          };
+          
+          // Kat sayısı varsa WORK_GROUPS'u yeniden oluştur
+          const maxFloors = ns.state.projectInfo.maxFloors || 10;
+          ns.initializeWorkGroups(maxFloors);
+          
           ns.updateProjectNameLabel();
 
           if (cfg.exportedAt) {
@@ -278,6 +294,12 @@
             ns.state.offsetX = 0;
             ns.state.offsetY = 0;
             ns.setTransform();
+            
+            // İmalat dropdown'unu yeniden doldur (kalıp türüne göre filtrelenmiş)
+            if (typeof ns.refreshWorkViewSelect === 'function') {
+              ns.refreshWorkViewSelect();
+            }
+            
             ns.renderHotspots();
             ns.renderSidePanel();
             if (typeof ns.resetHistory === 'function') ns.resetHistory();

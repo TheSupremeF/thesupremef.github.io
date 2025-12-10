@@ -180,7 +180,22 @@
     <div class="modal-dialog">
       <h2>Proje bilgileri</h2>
       <p>Bu EPP dosyasına ait proje adını ve yükleniciyi kaydedebilirsin.</p>
-      <label for="projectNameInput">Proje adı</label>
+      <label for="projectTypeSelect" style="margin-top:8px;">Proje Türü</label>
+      <select id="projectTypeSelect">
+        <option value="ETAP">ETAP</option>
+        <option value="ADA">ADA</option>
+      </select>
+      <label for="formworkTypeSelect" style="margin-top:8px;">Kalıp Türü</label>
+      <select id="formworkTypeSelect">
+        <option value="TÜNEL">TÜNEL</option>
+        <option value="KONVANSİYONEL">KONVANSİYONEL</option>
+        <option value="HİBRİT">HİBRİT</option>
+      </select>
+      <label for="maxFloorsInput" style="margin-top:8px;">Maksimum Kat Sayısı</label>
+      <input type="number" id="maxFloorsInput" min="1" max="99" placeholder="10" 
+             style="width: 80px; text-align: center; font-size: 18px; font-weight: 600; padding: 8px;">
+      <p class="hint">1-99 kat arası girilebilir.</p>
+      <label for="projectNameInput" style="margin-top:12px;">Proje adı</label>
       <input type="text" id="projectNameInput" placeholder="Örn. KAHRAMANMARAŞ DULKADİROĞLU MERKEZ 15 2. ETAP 1. KISIM">
       <label for="projectContractorInput" style="margin-top:8px;">Yüklenici</label>
       <input type="text" id="projectContractorInput" placeholder="Örn. SUR YAPI Endüstri San. ve Tic. A.Ş.">

@@ -169,18 +169,33 @@
     
     const projectContractorCodeInput = document.getElementById('projectContractorCodeInput');
     const projectContractorShortInput = document.getElementById('projectContractorShortInput');
+    const projectTypeSelect = document.getElementById('projectTypeSelect');
+    const formworkTypeSelect = document.getElementById('formworkTypeSelect');
+    const maxFloorsInput = document.getElementById('maxFloorsInput');
 
     if (projectInfoBtn && projectInfoOverlay) {
       projectInfoBtn.addEventListener('click', () => {
         if (ns.state.mode !== 'editor') return;
-        const info = ns.state.projectInfo || { name: '', contractor: '', contractorCode: '', contractorShort: '' };
+        const info = ns.state.projectInfo || { 
+          name: '', 
+          contractor: '', 
+          contractorCode: '', 
+          contractorShort: '',
+          projectType: 'ETAP',
+          formworkType: 'TÜNEL',
+          maxFloors: 10
+        };
         if (projectNameInput) projectNameInput.value = info.name || '';
         if (projectContractorInput) projectContractorInput.value = info.contractor || '';
         if (projectContractorCodeInput) projectContractorCodeInput.value = info.contractorCode || '';
         if (projectContractorShortInput) projectContractorShortInput.value = info.contractorShort || '';
+        if (projectTypeSelect) projectTypeSelect.value = info.projectType || 'ETAP';
+        if (formworkTypeSelect) formworkTypeSelect.value = info.formworkType || 'TÜNEL';
+        if (maxFloorsInput) maxFloorsInput.value = info.maxFloors || 10;
+        
         projectInfoOverlay.style.display = 'flex';
         setTimeout(() => {
-          if (projectNameInput) projectNameInput.focus();
+          if (projectTypeSelect) projectTypeSelect.focus();
         }, 10);
       });
 
@@ -199,8 +214,32 @@
         const contractor = projectContractorInput ? projectContractorInput.value.trim() : '';
         const contractorCode = projectContractorCodeInput ? projectContractorCodeInput.value.trim() : '';
         const contractorShort = projectContractorShortInput ? projectContractorShortInput.value.trim() : '';
-        ns.state.projectInfo = { name, contractor, contractorCode, contractorShort };
+        const projectType = projectTypeSelect ? projectTypeSelect.value : 'ETAP';
+        const formworkType = formworkTypeSelect ? formworkTypeSelect.value : 'TÜNEL';
+        
+        // maxFloors'u basit input'tan oku ve 1-99 arası sınırla
+        let maxFloors = 10;
+        if (maxFloorsInput) {
+          maxFloors = parseInt(maxFloorsInput.value) || 10;
+          maxFloors = Math.max(1, Math.min(99, maxFloors));
+        }
+        
+        // Kat sayısı değiştiyse WORK_GROUPS'u yeniden oluştur
+        const oldMaxFloors = ns.state.projectInfo.maxFloors || 10;
+        if (maxFloors !== oldMaxFloors) {
+          ns.initializeWorkGroups(maxFloors);
+        }
+        
+        ns.state.projectInfo = { name, contractor, contractorCode, contractorShort, projectType, formworkType, maxFloors };
         ns.updateProjectNameLabel();
+        
+        // Proje türü veya kalıp türü değiştiğinde tüm UI'ı yeniden render et
+        if (typeof ns.refreshWorkViewSelect === 'function') {
+          ns.refreshWorkViewSelect();
+        }
+        ns.renderHotspots();
+        ns.renderSidePanel();
+        
         projectInfoOverlay.style.display = 'none';
       });
     }

@@ -26,7 +26,10 @@
       name: '', 
       contractor: '',
       contractorCode: '',
-      contractorShort: ''
+      contractorShort: '',
+      projectType: 'ETAP', // Default: ETAP veya ADA
+      formworkType: 'TÜNEL', // Default: TÜNEL, KONVANSİYONEL, HİBRİT
+      maxFloors: 10 // Default: 10 kat
     },
     selectedDate: new Date().toISOString().split('T')[0],
     drawMode: null
@@ -174,7 +177,10 @@
 
   ns.buildHotspotLabel = function(h) {
     const parts = [];
-    if (h.ada && h.ada.trim()) parts.push('ADA ' + h.ada.trim());
+    const projectType = ns.state.projectInfo?.projectType || 'ETAP';
+    const typeLabel = projectType === 'ADA' ? 'ADA' : 'ETAP';
+    
+    if (h.ada && h.ada.trim()) parts.push(typeLabel + ' ' + h.ada.trim());
     if (h.parsel && h.parsel.trim()) parts.push('PARSEL ' + h.parsel.trim());
     if (h.blok && h.blok.trim()) parts.push(h.blok.trim() + ' BLOK');
     return parts.length > 0 ? parts.join(' - ') : h.id;

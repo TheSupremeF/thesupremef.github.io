@@ -127,7 +127,7 @@
       }
 
       if (hs.works) {
-        WORK_GROUPS.forEach(group => {
+        ns.getFilteredWorkGroups().forEach(group => {
           let groupHasData = false;
           group.items.forEach(w => {
             const item = hs.works[w.id];
@@ -385,8 +385,11 @@
     h.textContent = 'Blok Düzenle';
     secEdit.appendChild(h);
 
+    const projectType = ns.state.projectInfo?.projectType || 'ETAP';
+    const typeLabel = projectType === 'ADA' ? 'Ada' : 'Etap';
+    
     const adaLabel = document.createElement('label');
-    adaLabel.textContent = 'Ada';
+    adaLabel.textContent = typeLabel;
     secEdit.appendChild(adaLabel);
     const adaInput = document.createElement('input');
     adaInput.type = 'text';
@@ -707,13 +710,54 @@
     const secWorks = document.createElement('div');
     secWorks.className = 'side-section';
 
-    WORK_GROUPS.forEach(group => {
-      const gh = document.createElement('p');
-      gh.style.fontWeight = '600';
-      gh.style.fontSize = '12px';
-      gh.style.margin = '6px 0 2px 0';
-      gh.textContent = group.label;
-      secWorks.appendChild(gh);
+    ns.getFilteredWorkGroups().forEach(group => {
+      // Grup için collapsible section oluştur
+      const groupSection = document.createElement('div');
+      groupSection.style.marginTop = '8px';
+      groupSection.style.border = '1px solid #374151';
+      groupSection.style.borderRadius = '6px';
+      groupSection.style.overflow = 'hidden';
+      
+      // Grup başlığı (collapsible header)
+      const groupHeader = document.createElement('div');
+      groupHeader.style.display = 'flex';
+      groupHeader.style.justifyContent = 'space-between';
+      groupHeader.style.alignItems = 'center';
+      groupHeader.style.padding = '6px 8px';
+      groupHeader.style.background = '#1f2937';
+      groupHeader.style.cursor = 'pointer';
+      groupHeader.style.userSelect = 'none';
+      
+      const groupTitle = document.createElement('span');
+      groupTitle.textContent = group.label;
+      groupTitle.style.fontSize = '11px';
+      groupTitle.style.fontWeight = '600';
+      groupTitle.style.color = '#e5e7eb';
+      
+      const groupToggle = document.createElement('span');
+      groupToggle.textContent = '▼';
+      groupToggle.style.fontSize = '9px';
+      groupToggle.style.color = '#9ca3af';
+      groupToggle.style.transition = 'transform 0.2s';
+      
+      groupHeader.appendChild(groupTitle);
+      groupHeader.appendChild(groupToggle);
+      
+      // Grup içeriği (başlangıçta kapalı)
+      const groupContent = document.createElement('div');
+      groupContent.style.padding = '6px';
+      groupContent.style.background = '#111827';
+      groupContent.style.display = 'none';
+      
+      // Toggle fonksiyonu
+      groupHeader.addEventListener('click', () => {
+        const isHidden = groupContent.style.display === 'none';
+        groupContent.style.display = isHidden ? 'block' : 'none';
+        groupToggle.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+      });
+      
+      groupSection.appendChild(groupHeader);
+      groupSection.appendChild(groupContent);
 
       group.items.forEach(w => {
         let record = hs.dailyRecords.find(r => r.date === selectedDate && r.workTypeId === w.id);
@@ -823,8 +867,10 @@
 
         row.appendChild(datesRow);
 
-        secWorks.appendChild(row);
+        groupContent.appendChild(row);
       });
+      
+      secWorks.appendChild(groupSection);
     });
 
     dailyContent.appendChild(secWorks);
@@ -1124,7 +1170,7 @@
         emptyOpt.textContent = '-- Seçiniz --';
         workTypeSelect.appendChild(emptyOpt);
         // İmalat türlerini grupla
-        WORK_GROUPS.forEach(group => {
+        ns.getFilteredWorkGroups().forEach(group => {
           const optgroup = document.createElement('optgroup');
           optgroup.label = group.label;
           group.items.forEach(item => {
@@ -1755,7 +1801,7 @@
     
     ns.state.hotspots.forEach(hs => {
       if (!hs.works) return;
-      ALL_WORK_ITEMS.forEach(w => {
+      ns.getFilteredWorkItems().forEach(w => {
         const work = hs.works[w.id];
         if (work && work.status === 'baslayabilir') {
           if (!readyByWorkType[w.id]) {
@@ -1775,7 +1821,7 @@
     const workTypeIds = Object.keys(readyByWorkType);
     
     // WORK_GROUPS sıralamasına göre sırala
-    const sortedWorkTypeIds = ALL_WORK_ITEMS
+    const sortedWorkTypeIds = ns.getFilteredWorkItems()
       .map(w => w.id)
       .filter(id => workTypeIds.includes(id));
     

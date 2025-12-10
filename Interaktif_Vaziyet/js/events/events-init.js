@@ -57,9 +57,14 @@
     };
   }
 
+  let workViewSelectInitialized = false;
+  
   function initWorkViewSelect() {
     const { workViewSelect } = ns.dom;
     if (!workViewSelect) return;
+
+    // Mevcut seçimi sakla
+    const currentValue = workViewSelect.value;
 
     workViewSelect.innerHTML = '';
     const optDefault = document.createElement('option');
@@ -67,7 +72,7 @@
     optDefault.textContent = 'Orijinal görünüm';
     workViewSelect.appendChild(optDefault);
 
-    WORK_GROUPS.forEach(group => {
+    ns.getFilteredWorkGroups().forEach(group => {
       const og = document.createElement('optgroup');
       og.label = group.label;
       group.items.forEach(item => {
@@ -79,14 +84,26 @@
       workViewSelect.appendChild(og);
     });
 
-    workViewSelect.addEventListener('change', () => {
-      const val = workViewSelect.value || '';
-      ns.state.highlightWorkTypeId = val === '' ? null : val;
-      ns.state.showSummary = false;
-      ns.renderHotspots();
-      updateWorkViewStats();
-    });
+    // Önceki seçimi geri yükle (eğer hala varsa)
+    if (currentValue && Array.from(workViewSelect.options).some(opt => opt.value === currentValue)) {
+      workViewSelect.value = currentValue;
+    }
+
+    // Event listener'ı sadece ilk sefer ekle
+    if (!workViewSelectInitialized) {
+      workViewSelect.addEventListener('change', () => {
+        const val = workViewSelect.value || '';
+        ns.state.highlightWorkTypeId = val === '' ? null : val;
+        ns.state.showSummary = false;
+        ns.renderHotspots();
+        updateWorkViewStats();
+      });
+      workViewSelectInitialized = true;
+    }
   }
+  
+  // Public hale getir
+  ns.refreshWorkViewSelect = initWorkViewSelect;
 
   function updateWorkViewStats() {
     const { workViewSelect, workViewStats } = ns.dom;
@@ -207,7 +224,7 @@
       rows.push([]);
 
       const headerRow = ['ADA', 'PARSEL', 'BLOK'];
-      ALL_WORK_ITEMS.forEach(w => {
+      ns.getFilteredWorkItems().forEach(w => {
         headerRow.push(w.label);
       });
       rows.push(headerRow);
@@ -219,7 +236,7 @@
 
         const row = [adaVal, parselVal, blokVal];
 
-        ALL_WORK_ITEMS.forEach(workItem => {
+        ns.getFilteredWorkItems().forEach(workItem => {
           let workers = 0;
           if (hs.dailyRecords && Array.isArray(hs.dailyRecords)) {
             hs.dailyRecords
