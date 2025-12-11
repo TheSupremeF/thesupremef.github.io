@@ -297,7 +297,7 @@
         // Sınırları kontrol et
         ns.state.settings = {
           gridSize: Math.max(25, Math.min(200, gridSize)),
-          labelFontSize: Math.max(8, Math.min(24, labelFontSize)),
+          labelFontSize: Math.max(4, Math.min(24, labelFontSize)),
           labelOffsetX: Math.max(-100, Math.min(100, labelOffsetX)),
           labelOffsetY: Math.max(-100, Math.min(100, labelOffsetY))
         };

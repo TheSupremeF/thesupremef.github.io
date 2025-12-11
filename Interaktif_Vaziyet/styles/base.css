@@ -1,24 +1,90 @@
+/* Inter font import (tarayıcıda kullanmak için) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* ============================================
    BASE STYLES - Layout, Structure, Fundamentals
    ============================================ */
 
-/* Reset & Box Model */
-* { 
-  box-sizing: border-box; 
+/* Theme Tokens */
+:root {
+  /* Dark theme defaults */
+  --bg-body: #020617;
+  --bg-body-alt: #0f172a;
+  --bg-header: rgba(2, 6, 23, 0.96);
+  --bg-canvas: #020617;
+  --bg-aside: rgba(2, 6, 23, 0.98);
+  --bg-aside-mobile: rgba(2, 6, 23, 0.98);
+
+  --border-subtle: #1f2937;
+  --border-strong: #111827;
+
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --accent: #22c55e;
+  --accent-soft: rgba(34, 197, 94, 0.14);
+
+  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.85);
+  --shadow-header: 0 10px 30px rgba(15, 23, 42, 0.75);
 }
 
-html, body {
+/* Optional explicit dark mode hook */
+body[data-theme="dark"] {
+  /* dark varsayılan */
+}
+
+/* Light mode polymorph */
+body[data-theme="light"] {
+  background: radial-gradient(circle at top, #e5f3ff 0%, #f9fafb 35%, #e5e7eb 100%);
+  color: #111827;
+}
+
+body[data-theme="light"] header {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom-color: #e5e7eb;
+  box-shadow: 0 8px 24px rgba(148, 163, 184, 0.3);
+}
+
+body[data-theme="light"] .canvas-wrapper {
+  background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15), transparent 55%),
+              radial-gradient(circle at 80% 85%, rgba(34, 197, 94, 0.12), transparent 60%),
+              #f3f4f6;
+}
+
+body[data-theme="light"] aside {
+  background: rgba(255, 255, 255, 0.96);
+  border-left-color: #e5e7eb;
+  box-shadow: -18px 0 45px rgba(148, 163, 184, 0.55);
+}
+
+body[data-theme="light"] .aside-backdrop {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Reset & Box Model */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #020617 0%, #020617 30%, #0b1120 70%, #020617 100%);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    background 0.35s ease;
 }
 
-body { 
-  display: flex; 
-  flex-direction: column; 
+body {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Material Icons */
@@ -35,20 +101,146 @@ body {
 /* Header */
 header {
   padding: 8px 16px;
-  background: #020617;
-  border-bottom: 1px solid #1f2937;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.26), transparent 55%),
+    #020617;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 12px;
+  box-shadow: var(--shadow-header);
+  backdrop-filter: blur(14px) saturate(150%);
+  position: relative;
+  z-index: 40;
+  min-height: 48px;
 }
 
+/* Altta ince bir highlight şeridi (yeşil-lacivert) */
+header::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #22c55e 0%,
+    #0ea5e9 40%,
+    #2563eb 70%,
+    #22c55e 100%
+  );
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Logo */
 header img.logo {
   height: 28px;
   width: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
-header .spacer { 
-  flex: 1; 
+/* Ortadaki boşluk */
+header .spacer {
+  flex: 1;
+}
+header .projectName {
+  font-size: 12px;
+  font-weight: 500; /* eklemek istersen */
+}
+header .ivp {
+	font-size: 12px;
+	font-weight: 500; /* eklemek istersen */
+}
+/* Header Hamburger Menu */
+.header-menu {
+  position: relative;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Checkbox görünmesin */
+.header-menu-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Menü butonu (icon-top-button ile aynı stil, ufak ekler) */
+.header-menu-button {
+  margin-left: 8px;
+}
+
+/* Dropdown kutusu */
+.header-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  min-width: 220px;
+  padding: 10px 10px 8px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(30, 64, 175, 0.8);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.95),
+    0 0 0 1px rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(14px) saturate(150%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.18s ease-out,
+    transform 0.18s ease-out;
+  z-index: 50;
+}
+
+/* Checkbox işaretlenince menüyü göster */
+.header-menu-checkbox:checked + .header-menu-button + .header-menu-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(4px);
+}
+
+/* Menü içi bölümler */
+.header-menu-section {
+  padding: 4px 4px 6px;
+  border-bottom: 1px solid rgba(30, 64, 175, 0.6);
+  margin-bottom: 4px;
+}
+
+.header-menu-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* Bölüm başlığı */
+.header-menu-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+
+/* Menü içindeki chip */
+.header-menu-dropdown .chip.last-export {
+  font-size: 11px;
+  padding-inline: 10px;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+/* Menü içindeki icon-top-button'ları biraz sıkıştır */
+.header-menu-dropdown .icon-top-button {
+  margin-left: 0;
+  margin-right: 4px;
+  width: 30px;
+  height: 30px;
 }
 
 /* Main Layout */
@@ -57,8 +249,10 @@ main {
   display: flex;
   min-height: 0;
   position: relative;
+  isolation: isolate;
 }
 
+/* Canvas Column */
 .canvas-column {
   flex: 1;
   display: flex;
@@ -67,18 +261,43 @@ main {
   position: relative;
 }
 
+/* Canvas Wrapper with polymorphic background */
 .canvas-wrapper {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: #020617;
+  background: var(--bg-canvas);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.65);
 }
 
+/* Organik / polymorph ışık efektleri */
+.canvas-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(59, 130, 246, 0.28), transparent 55%),
+    radial-gradient(circle at 82% 78%, rgba(34, 197, 94, 0.22), transparent 60%),
+    radial-gradient(circle at 50% 105%, rgba(244, 114, 182, 0.16), transparent 60%);
+  opacity: 0.75;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  filter: blur(10px);
+  transition: opacity 0.35s ease;
+}
+
+body[data-theme="light"] .canvas-wrapper::before {
+  opacity: 0.55;
+  filter: blur(14px);
+}
+
+/* Gerçek içerik */
 #viewport {
   position: absolute;
-  top: 0; 
+  top: 0;
   left: 0;
   transform-origin: 0 0;
+  will-change: transform;
 }
 
 #mainImage {
@@ -97,13 +316,17 @@ aside {
   height: 100%;
   width: 360px;
   max-width: 42%;
-  background: #020617;
+  background: var(--bg-aside);
   display: flex;
   flex-direction: column;
-  box-shadow: -16px 0 40px rgba(0,0,0,0.6);
-  border-left: 1px solid #1f2937;
+  box-shadow: -16px 0 40px rgba(0, 0, 0, 0.75);
+  border-left: 1px solid var(--border-subtle);
   z-index: 30;
-  transition: right 0.3s ease-out;
+  transition:
+    right 0.3s ease-out,
+    box-shadow 0.25s ease-out,
+    background-color 0.25s ease;
+  backdrop-filter: blur(18px) saturate(140%);
 }
 
 aside.visible {
@@ -111,20 +334,24 @@ aside.visible {
 }
 
 aside header {
-  background: #020617;
-  border-bottom: 1px solid #1f2937;
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Aside Backdrop */
 .aside-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15,23,42,0.5);
+  background: rgba(15, 23, 42, 0.5);
   z-index: 29;
   display: none;
+  transition: opacity 0.25s ease;
 }
 
 .aside-backdrop.visible {
@@ -136,11 +363,11 @@ aside header {
   main {
     flex-direction: column;
   }
-  
+
   .canvas-column {
     height: 55vh;
   }
-  
+
   aside {
     left: 0;
     right: 0;
@@ -149,17 +376,21 @@ aside header {
     width: 100%;
     max-width: none;
     height: 45vh;
-    box-shadow: 0 -16px 40px rgba(0,0,0,0.6);
+    background: var(--bg-aside-mobile);
+    box-shadow: 0 -16px 40px rgba(0, 0, 0, 0.75);
     border-left: none;
-    border-top: 1px solid #1f2937;
-    transition: bottom 0.3s ease-out;
+    border-top: 1px solid var(--border-subtle);
+    border-radius: 18px 18px 0 0;
+    transition:
+      bottom 0.3s ease-out,
+      background-color 0.25s ease;
   }
-  
+
   aside.visible {
     bottom: 0;
     right: auto;
   }
-  
+
   .aside-backdrop {
     display: none !important;
   }

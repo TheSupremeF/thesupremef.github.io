@@ -13,45 +13,77 @@
   <link rel="stylesheet" href="styles/components.css" />
 </head>
 <body>
-  <header>
-    <img src="img/logo.png" alt="Logo" class="logo" />
-    <span class="chip">İnteraktif Vaziyet Planı</span>
+<header>
+  <img src="img/logo.png" alt="Logo" class="logo" />
+  <span class="ivp">İnteraktif Vaziyet Planı</span>
+  <div class="toolbar-separator"></div>
+  <!-- Proje adı (dışarıda kalsın) -->
+  <span id="projectNameLabel" class="projectName" style="display:none;"></span>
 
-    <span id="lastExportLabel" class="chip last-export">Son kayıt: -</span>
-    <span id="projectNameLabel" class="chip" style="display:none;"></span>
+  <div class="spacer"></div>
 
-    <div class="spacer"></div>
+  <!-- Proje bilgileri (menüye girmiyor, dışarıda kalıyor) -->
+  <button id="projectInfoBtn"
+          class="icon-top-button"
+          title="Proje bilgileri"
+          style="display:none">
+    <span class="material-symbols-outlined">apartment</span>
+  </button>
 
-    <button id="projectInfoBtn"
-            class="icon-top-button"
-            title="Proje bilgileri"
-            style="display:none">
-      <span class="material-symbols-outlined">info</span>
-    </button>
+  <!-- Mode toggle (viewer / editor) -> Dışarıda kalacak -->
+  <div class="mode-toggle" id="modeToggle">
+    <button class="material-symbols-outlined active" data-mode="viewer">visibility</button>
+    <button class="material-symbols-outlined" data-mode="editor">edit</button>
+  </div>
 
-    <button id="passwordSettingsBtn"
-            class="icon-top-button"
-            title="Düzenleme PIN'i"
-            style="display:none">
-      <span class="material-symbols-outlined">vpn_key</span>
-    </button>
+  <!-- HAMBURGER MENÜ -->
+  <div class="header-menu">
+    <!-- Checkbox hack ile aç/kapa -->
+    <input type="checkbox" id="headerMenuToggle" class="header-menu-checkbox">
 
-    <button id="settingsBtn"
-            class="icon-top-button"
-            title="Ayarlar"
-            style="display:none">
-      <span class="material-symbols-outlined">settings</span>
-    </button>
+    <!-- Menü düğmesi -->
+    <label for="headerMenuToggle"
+           class="icon-top-button header-menu-button"
+           title="Menü">
+      <span class="material-symbols-outlined">menu</span>
+    </label>
 
-    <div class="mode-toggle" id="modeToggle">
-      <button data-mode="viewer" class="active">Görüntüle</button>
-      <button data-mode="editor">Düzenle</button>
+    <!-- Dropdown içeriği -->
+    <div class="header-menu-dropdown">
+      <!-- Son kayıt bilgisi -->
+      <div class="header-menu-section">
+        <span class="header-menu-label">Dosya</span>
+        <span id="lastExportLabel" class="chip last-export">Son kayıt: -</span>
+      </div>
+
+      <!-- Ayarlar / PIN / Hakkında -->
+      <div class="header-menu-section">
+        <span class="header-menu-label">Araçlar</span>
+
+        <button id="passwordSettingsBtn"
+                class="icon-top-button"
+                title="Düzenleme PIN'i"
+                style="display:none">
+          <span class="material-symbols-outlined">vpn_key</span>
+        </button>
+
+        <button id="settingsBtn"
+                class="icon-top-button"
+                title="Ayarlar"
+                style="display:none">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+
+        <button id="aboutBtn"
+                class="icon-top-button"
+                title="Hakkında">
+          <span class="material-symbols-outlined">info</span>
+        </button>
+      </div>
     </div>
+  </div>
+</header>
 
-    <button id="aboutBtn" class="icon-top-button" title="Hakkında">
-      <span class="material-symbols-outlined">info</span>
-    </button>
-  </header>
 
   <main>
     <div class="canvas-column">
@@ -159,7 +191,6 @@
         <button id="passwordSettingsCancel">Vazgeç</button>
         <button id="passwordSettingsSave">Kaydet</button>
       </div>
-      <p class="hint">Bu PIN EPP içindeki config.json'da düz metin olarak saklanır.</p>
     </div>
   </div>
 
@@ -185,19 +216,23 @@
   <!-- Proje bilgileri -->
   <div id="projectInfoOverlay" class="modal-backdrop">
     <div class="modal-dialog">
-      <h2>Proje bilgileri</h2>
+<h2 class="modal-title">
+  <span style="font-size:28px;" class="material-symbols-outlined">apartment</span>
+  Proje bilgileri
+</h2>
       <p>Bu EPP dosyasına ait proje adını ve yükleniciyi kaydedebilirsin.</p>
       <label for="projectTypeSelect" style="margin-top:8px;">Proje Türü</label>
       <select id="projectTypeSelect">
-        <option value="ETAP">ETAP</option>
-        <option value="ADA">ADA</option>
+        <option value="ETAP">Etap</option>
+        <option value="ADA">Ada</option>
       </select>
       <label for="formworkTypeSelect" style="margin-top:8px;">Kalıp Türü</label>
       <select id="formworkTypeSelect">
-        <option value="TÜNEL">TÜNEL</option>
-        <option value="KONVANSİYONEL">KONVANSİYONEL</option>
-        <option value="HİBRİT">HİBRİT</option>
+        <option value="TÜNEL">Tünel Kalıp</option>
+        <option value="KONVANSİYONEL">Konvansiyonel</option>
+        <option value="HİBRİT">Hibrit</option>
       </select>
+      <p class="hint">Hibrit, hem Tünel hem de Konvansiyonel olan şantiyeler içindir.</p>
       <label for="maxFloorsInput" style="margin-top:8px;">Maksimum Kat Sayısı</label>
       <input type="number" id="maxFloorsInput" min="1" max="99" placeholder="10" 
              style="width: 80px; text-align: center; font-size: 18px; font-weight: 600; padding: 8px;">
@@ -214,45 +249,52 @@
         <button id="projectInfoCancel">Vazgeç</button>
         <button id="projectInfoSave">Kaydet</button>
       </div>
-      <p class="hint">Bu bilgiler EPP içindeki config.json'da düz metin olarak saklanır.</p>
     </div>
   </div>
 
-  <!-- Ayarlar -->
-  <div id="settingsOverlay" class="modal-backdrop">
-    <div class="modal-dialog">
-      <h2>⚙️ Ayarlar</h2>
-      <p>Grid ve etiket ayarlarını yapılandırabilirsin.</p>
-      
-      <h3 style="margin-top:16px;font-size:14px;color:#e5e7eb;">🔲 Grid Ayarları</h3>
-      <label for="gridSizeInput" style="margin-top:8px;">Grid Boyutu (%)</label>
-      <input type="number" id="gridSizeInput" min="25" max="200" step="25" placeholder="100" 
-             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
-      <p class="hint">Grid snap hassasiyetini ayarlar. Küçük değer = daha çok grid. (25-200% arası)</p>
-      
-      <h3 style="margin-top:16px;font-size:14px;color:#e5e7eb;">🏷️ Etiket Ayarları</h3>
-      <label for="labelFontSizeInput" style="margin-top:8px;">Etiket Boyutu (px)</label>
-      <input type="number" id="labelFontSizeInput" min="8" max="24" placeholder="12" 
-             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
-      <p class="hint">Blok etiketlerinin yazı boyutu. (8-24px arası)</p>
-      
-      <label for="labelOffsetXInput" style="margin-top:8px;">Etiket X Kaydırma (px)</label>
-      <input type="number" id="labelOffsetXInput" min="-100" max="100" placeholder="0" 
-             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
-      <p class="hint">Etiketlerin yatay pozisyonu. (-100 ile +100 arası)</p>
-      
-      <label for="labelOffsetYInput" style="margin-top:8px;">Etiket Y Kaydırma (px)</label>
-      <input type="number" id="labelOffsetYInput" min="-100" max="100" placeholder="0" 
-             style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
-      <p class="hint">Etiketlerin dikey pozisyonu. (-100 ile +100 arası)</p>
-      
-      <div class="modal-actions" style="margin-top:16px;">
-        <button id="settingsCancel">Vazgeç</button>
-        <button id="settingsSave">Kaydet</button>
-      </div>
-      <p class="hint">Ayarlar EPP içindeki config.json'da saklanır.</p>
+<div id="settingsOverlay" class="modal-backdrop">
+  <div class="modal-dialog">
+    <h3 class="modal-title">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Ayarlar</span>
+    </h2>
+    <p>Grid ve etiket ayarlarını yapılandırabilirsin.</p>
+    
+    <h4 class="modal-subtitle" style="margin-top:16px;">
+      <span class="material-symbols-outlined">grid_4x4</span>
+      <span>Grid Ayarları</span>
+    </h1>
+    <label for="gridSizeInput" style="margin-top:8px;">Grid Boyutu (%)</label>
+    <input type="number" id="gridSizeInput" min="25" max="200" step="25" placeholder="100" 
+           style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+    <p class="hint">Grid snap hassasiyetini ayarlar. Küçük değer = daha çok grid. (25-200% arası)</p>
+    
+    <h4 class="modal-subtitle" style="margin-top:16px;">
+      <span class="material-symbols-outlined">label</span>
+      <span>Etiket Ayarları</span>
+    </h4>
+    <label for="labelFontSizeInput" style="margin-top:8px;">Etiket Boyutu (px)</label>
+    <input type="number" id="labelFontSizeInput" min="4" max="24" placeholder="12" 
+           style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+    <p class="hint">Blok etiketlerinin yazı boyutu. (4-24px arası)</p>
+    
+    <label for="labelOffsetXInput" style="margin-top:8px;">Etiket X Kaydırma (px)</label>
+    <input type="number" id="labelOffsetXInput" min="-100" max="100" placeholder="0" 
+           style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+    <p class="hint">Etiketlerin yatay pozisyonu. (-100 ile +100 arası)</p>
+    
+    <label for="labelOffsetYInput" style="margin-top:8px;">Etiket Y Kaydırma (px)</label>
+    <input type="number" id="labelOffsetYInput" min="-100" max="100" placeholder="0" 
+           style="width: 100px; text-align: center; font-size: 16px; font-weight: 600; padding: 8px;">
+    <p class="hint">Etiketlerin dikey pozisyonu. (-100 ile +100 arası)</p>
+    
+    <div class="modal-actions" style="margin-top:16px;">
+      <button id="settingsCancel">Vazgeç</button>
+      <button id="settingsSave">Kaydet</button>
     </div>
   </div>
+</div>
+
 
   <!-- Detay görseli büyük gösterme -->
   <div id="detailImageOverlay" class="modal-backdrop">
