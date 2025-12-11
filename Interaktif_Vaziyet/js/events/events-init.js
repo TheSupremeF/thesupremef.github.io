@@ -179,10 +179,128 @@
     }
   }
 
+  /**
+   * Handle layout updates - called on resize and after critical layout changes
+   * This ensures SVG dimensions and all visual elements are correctly sized
+   */
+  function handleLayoutUpdate() {
+    // Update SVG dimensions and re-render all drawings
+    if (typeof ns.renderDrawings === 'function') {
+      ns.renderDrawings();
+    }
+    // Update hotspot layer
+    if (typeof ns.renderHotspots === 'function') {
+      ns.renderHotspots();
+    }
+  }
+
+  /**
+   * Setup resize handler to fix pixelation issues
+   */
+  function setupResizeHandler() {
+    let resizeTimeout;
+    
+    // Debounced resize handler
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        handleLayoutUpdate();
+      }, 100);
+    };
+    
+    // Listen to window resize
+    window.addEventListener('resize', handleResize);
+    
+    // Also handle orientation changes on mobile
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleLayoutUpdate, 300);
+    });
+  }
+
+  /**
+   * Ensure proper initial rendering after everything is loaded
+   * This fixes the initial pixelation issue by waiting for valid layout dimensions
+   */
+  function ensureInitialRender() {
+    const { mainImage, viewport, canvasWrapper } = ns.dom;
+    
+    // Function to check if viewport has valid dimensions (at least 100x100)
+    const hasValidDimensions = () => {
+      const vw = viewport ? viewport.offsetWidth : 0;
+      const vh = viewport ? viewport.offsetHeight : 0;
+      const cw = canvasWrapper ? canvasWrapper.clientWidth : 0;
+      const ch = canvasWrapper ? canvasWrapper.clientHeight : 0;
+      
+      // Require at least 100px to ensure layout is really complete
+      const validViewport = (vw >= 100 && vh >= 100);
+      const validCanvas = (cw >= 100 && ch >= 100);
+      
+      return validViewport || validCanvas;
+    };
+    
+    // Function to attempt render with dimension validation
+    const attemptRender = () => {
+      if (hasValidDimensions()) {
+        handleLayoutUpdate();
+        return true;
+      }
+      return false;
+    };
+    
+    // Strategy 1: Wait for image load if present
+    if (mainImage && ns.state.mainImageUrl) {
+      if (mainImage.complete && mainImage.naturalHeight !== 0) {
+        // Image already loaded - try immediate render after a frame
+        requestAnimationFrame(() => {
+          if (!attemptRender()) {
+            // Dimensions not ready yet, schedule retries
+            setTimeout(attemptRender, 100);
+            setTimeout(attemptRender, 250);
+            setTimeout(attemptRender, 500);
+          }
+        });
+      } else {
+        // Wait for image to load
+        mainImage.addEventListener('load', () => {
+          // Wait one frame after image load for layout to settle
+          requestAnimationFrame(() => {
+            attemptRender();
+            // Extra retries in case layout isn't complete
+            setTimeout(attemptRender, 100);
+            setTimeout(attemptRender, 250);
+          });
+        });
+      }
+    } else {
+      // No image - just wait for layout
+      // Try after next paint
+      requestAnimationFrame(() => {
+        if (!attemptRender()) {
+          // Not ready, schedule aggressive retries
+          setTimeout(attemptRender, 100);
+          setTimeout(attemptRender, 200);
+          setTimeout(attemptRender, 400);
+          setTimeout(attemptRender, 600);
+        }
+      });
+    }
+    
+    // Strategy 2: Fallback delays to guarantee eventual rendering
+    // These run regardless to ensure rendering happens eventually
+    setTimeout(attemptRender, 150);
+    setTimeout(attemptRender, 300);
+    setTimeout(attemptRender, 500);
+    setTimeout(attemptRender, 800);
+  }
+
 
   function boot() {
     initDom();
     initWorkViewSelect();
+    
+    // Setup resize handler BEFORE any rendering
+    setupResizeHandler();
+    
     ns.wireOverlays();
     ns.wirePasswordOverlays();
     ns.wireProjectInfoOverlay();
@@ -279,10 +397,14 @@
     ns.applyMode('viewer');
 
     if (typeof ns.resetHistory === 'function') ns.resetHistory();
+    
+    // Ensure proper initial rendering with correct dimensions
+    ensureInitialRender();
   }
   
   // Export functions to namespace
   ns.updateWorkViewStats = updateWorkViewStats;
+  ns.handleLayoutUpdate = handleLayoutUpdate;
   ns.boot = boot;
 
   // Note: boot() is called from events-shortcuts.js (last module)

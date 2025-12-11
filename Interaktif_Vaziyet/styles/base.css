@@ -299,6 +299,12 @@ body[data-theme="light"] .canvas-wrapper::before {
   left: 0;
   transform-origin: 0 0;
   will-change: transform;
+  /* Anti-aliasing düzeltmeleri - pixelation sorununu çözer */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 
 #mainImage {
@@ -307,6 +313,11 @@ body[data-theme="light"] .canvas-wrapper::before {
   height: auto;
   user-select: none;
   pointer-events: none;
+  /* Görsel kalitesi düzeltmeleri */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Aside Panel Base Structure */

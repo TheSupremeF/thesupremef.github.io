@@ -64,6 +64,10 @@
       ns.state.offsetX = 0;
       ns.state.offsetY = 0;
       ns.setTransform();
+      // Refresh all visual elements after reset
+      if (typeof ns.handleLayoutUpdate === 'function') {
+        ns.handleLayoutUpdate();
+      }
     });
 
     if (addBlockBtn) {

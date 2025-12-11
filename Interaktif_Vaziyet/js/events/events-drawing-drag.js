@@ -258,8 +258,10 @@
     drawingLayer.addEventListener('click', e => {
       if (ns.state.mode === 'editor') return; // Editor modunda mousedown kullanılıyor
       
-      // Drawing-line veya drawing-curve'e tıklanmış mı?
-      if (e.target.classList.contains('drawing-line') || e.target.classList.contains('drawing-curve')) {
+      // Drawing-line, drawing-curve, or drawing-poi'ye tıklanmış mı?
+      if (e.target.classList.contains('drawing-line') || 
+          e.target.classList.contains('drawing-curve') ||
+          e.target.classList.contains('drawing-poi')) {
         const g = findParentG(e.target);
         if (g && g.dataset.drawingId) {
           const drawingId = g.dataset.drawingId;

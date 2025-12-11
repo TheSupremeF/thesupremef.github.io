@@ -216,7 +216,9 @@
   ns.setTransform = function() {
     const { viewport } = ns.dom || {};
     if (!viewport) return;
-    viewport.style.transform = `translate(${ns.state.offsetX}px, ${ns.state.offsetY}px) scale(${ns.state.scale})`;
+    // GPU-accelerated transform kullanarak anti-aliasing kalitesini artır
+    // translate3d GPU katmanı oluşturur ve daha iyi rendering sağlar
+    viewport.style.transform = `translate3d(${ns.state.offsetX}px, ${ns.state.offsetY}px, 0) scale(${ns.state.scale})`;
   };
 
   let undoStack = [];

@@ -3,14 +3,55 @@
    * Render all drawings and text overlays
    */
   ns.renderDrawings = function() {
-    const { drawingLayer, textLayer, viewport } = ns.dom || {};
-    if (!drawingLayer || !textLayer) return;
+    const { drawingLayer, textLayer, viewport, canvasWrapper } = ns.dom || {};
+    if (!drawingLayer || !textLayer || !viewport) return;
 
-    // SVG boyutlarını viewport'a göre ayarla
-    const vw = viewport.offsetWidth;
-    const vh = viewport.offsetHeight;
-    drawingLayer.setAttribute('width', vw);
-    drawingLayer.setAttribute('height', vh);
+    // Get viewport dimensions
+    let vw = viewport.offsetWidth;
+    let vh = viewport.offsetHeight;
+    
+    if (vw === 0 || vh === 0) {
+      vw = canvasWrapper ? canvasWrapper.clientWidth : 0;
+      vh = canvasWrapper ? canvasWrapper.clientHeight : 0;
+    }
+    
+    if (vw < 100 || vh < 100) {
+      return;
+    }
+    
+    // Get current scale from state
+    const scale = ns.state.scale || 1;
+    const dpr = window.devicePixelRatio || 1;
+    
+    // CRITICAL FIX: Counter-scale SVG to cancel viewport transform
+    // viewport has transform: scale(X), so SVG needs transform: scale(1/X)
+    // This way SVG stays at 1:1 with screen pixels
+    const counterScale = 1 / scale;
+    drawingLayer.style.transform = `scale(${counterScale})`;
+    drawingLayer.style.transformOrigin = '0 0';
+    
+    // Render SVG at scaled dimensions (high resolution)
+    const renderScale = scale * dpr;
+    const renderW = Math.ceil(vw * renderScale);
+    const renderH = Math.ceil(vh * renderScale);
+    
+    // SVG pixel size (actual render resolution - HIGH!)
+    drawingLayer.setAttribute('width', renderW);
+    drawingLayer.setAttribute('height', renderH);
+    
+    // SVG display size (scaled up because of counter-scale)
+    // If counter-scale is 0.5, we need 2x display size to get back to vw x vh
+    drawingLayer.style.width = (vw * scale) + 'px';
+    drawingLayer.style.height = (vh * scale) + 'px';
+    
+    // viewBox stays at original coordinates
+    drawingLayer.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
+    drawingLayer.setAttribute('preserveAspectRatio', 'none');
+    
+    // Anti-aliasing
+    drawingLayer.setAttribute('shape-rendering', 'geometricPrecision');
+    drawingLayer.setAttribute('text-rendering', 'geometricPrecision');
+    drawingLayer.style.shapeRendering = 'geometricPrecision';
 
     // Clear existing drawings BUT preserve curve preview elements
     // (curve preview points should persist until curve is finalized/cancelled)
@@ -40,6 +81,7 @@
           line.setAttribute('stroke', drawing.color || '#eab308');
           line.setAttribute('stroke-width', isSelected ? (drawing.width || 2) + 2 : drawing.width || 2);
           line.setAttribute('opacity', isSelected ? '1' : '0.9');
+          line.setAttribute('shape-rendering', 'geometricPrecision');
           line.style.cursor = isEditor ? 'pointer' : 'default';
           line.style.pointerEvents = 'stroke';
           line.classList.add('drawing-line');
@@ -55,6 +97,7 @@
             startHandle.setAttribute('fill', '#3b82f6');
             startHandle.setAttribute('stroke', '#fff');
             startHandle.setAttribute('stroke-width', '2');
+            startHandle.setAttribute('shape-rendering', 'geometricPrecision');
             startHandle.style.cursor = 'move';
             startHandle.style.pointerEvents = 'auto';
             startHandle.classList.add('drawing-handle');
@@ -69,6 +112,7 @@
             endHandle.setAttribute('fill', '#3b82f6');
             endHandle.setAttribute('stroke', '#fff');
             endHandle.setAttribute('stroke-width', '2');
+            endHandle.setAttribute('shape-rendering', 'geometricPrecision');
             endHandle.style.cursor = 'move';
             endHandle.style.pointerEvents = 'auto';
             endHandle.classList.add('drawing-handle');
@@ -92,6 +136,7 @@
             path.setAttribute('stroke-width', isSelected ? (drawing.width || 2) + 2 : drawing.width || 2);
             path.setAttribute('fill', 'none');
             path.setAttribute('opacity', isSelected ? '1' : '0.9');
+            path.setAttribute('shape-rendering', 'geometricPrecision');
             path.style.cursor = isEditor ? 'pointer' : 'default';
             path.style.pointerEvents = 'stroke';
             path.classList.add('drawing-curve');
@@ -110,6 +155,7 @@
                 handle.setAttribute('fill', '#3b82f6');
                 handle.setAttribute('stroke', '#fff');
                 handle.setAttribute('stroke-width', '2');
+                handle.setAttribute('shape-rendering', 'geometricPrecision');
                 handle.style.cursor = 'move';
                 handle.style.pointerEvents = 'auto';
                 handle.classList.add('drawing-handle');
@@ -127,6 +173,7 @@
                 text.setAttribute('font-size', '11');
                 text.setAttribute('font-weight', 'bold');
                 text.setAttribute('pointer-events', 'none');
+                text.setAttribute('text-rendering', 'geometricPrecision');
                 text.textContent = String(pIdx + 1);
                 g.appendChild(text);
               });
@@ -157,6 +204,7 @@
             polygon.setAttribute('fill-opacity', drawing.fillOpacity !== undefined ? drawing.fillOpacity : 0.3);
             
             polygon.setAttribute('opacity', isSelected ? '1' : '0.9');
+            polygon.setAttribute('shape-rendering', 'geometricPrecision');
             polygon.style.cursor = isEditor ? 'pointer' : 'default';
             polygon.style.pointerEvents = 'auto';
             polygon.classList.add('drawing-curve'); // Reuse curve class for click handling
@@ -172,6 +220,7 @@
                 handle.setAttribute('fill', '#a855f7');
                 handle.setAttribute('stroke', '#fff');
                 handle.setAttribute('stroke-width', '2');
+                handle.setAttribute('shape-rendering', 'geometricPrecision');
                 handle.style.cursor = 'move';
                 handle.style.pointerEvents = 'auto';
                 handle.classList.add('drawing-handle');
@@ -189,6 +238,7 @@
                 text.setAttribute('font-size', '11');
                 text.setAttribute('font-weight', 'bold');
                 text.setAttribute('pointer-events', 'none');
+                text.setAttribute('text-rendering', 'geometricPrecision');
                 text.textContent = String(pIdx + 1);
                 g.appendChild(text);
               });
@@ -209,6 +259,9 @@
           text.setAttribute('font-weight', drawing.fontWeight || 'normal');
           text.setAttribute('text-anchor', 'middle');
           text.setAttribute('dominant-baseline', 'middle');
+          text.setAttribute('text-rendering', 'geometricPrecision');
+          text.style.fontSmooth = 'always';
+          text.style.webkitFontSmoothing = 'antialiased';
           text.style.cursor = isEditor ? 'move' : 'default';
           text.style.pointerEvents = 'auto';
           text.style.userSelect = 'none';
@@ -220,6 +273,7 @@
           const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           bg.setAttribute('fill', 'rgba(2, 6, 23, 0.7)');
           bg.setAttribute('rx', '4');
+          bg.setAttribute('shape-rendering', 'geometricPrecision');
           bg.classList.add('drawing-label-bg');
           
           g.appendChild(bg);
@@ -254,6 +308,7 @@
             handle.setAttribute('fill', '#eab308');
             handle.setAttribute('stroke', '#fff');
             handle.setAttribute('stroke-width', '2');
+            handle.setAttribute('shape-rendering', 'geometricPrecision');
             handle.style.cursor = 'move';
             handle.style.pointerEvents = 'auto';
             handle.classList.add('drawing-handle');
@@ -269,19 +324,29 @@
           circle.setAttribute('cx', (drawing.x * vw / 100) + '');
           circle.setAttribute('cy', (drawing.y * vh / 100) + '');
           circle.setAttribute('r', (drawing.radius || 8) + '');
-          circle.setAttribute('fill', drawing.fillColor || '#3b82f6');
-          circle.setAttribute('fill-opacity', drawing.fillOpacity !== undefined ? drawing.fillOpacity : 0.3);
-          circle.setAttribute('stroke', drawing.strokeColor || '#3b82f6');
+          circle.setAttribute('fill', drawing.fillColor || drawing.color || '#ef4444');
+          circle.setAttribute('fill-opacity', drawing.fillOpacity !== undefined ? drawing.fillOpacity : 0.8);
+          circle.setAttribute('stroke', drawing.strokeColor || drawing.color || '#ef4444');
           circle.setAttribute('stroke-width', isSelected ? '3' : '2');
           circle.setAttribute('stroke-opacity', drawing.strokeOpacity !== undefined ? drawing.strokeOpacity : 1);
-          circle.style.cursor = isEditor ? 'move' : 'default';
+          circle.setAttribute('shape-rendering', 'geometricPrecision');
+          circle.style.cursor = isEditor ? 'move' : 'pointer'; // pointer in viewer mode
           circle.style.pointerEvents = 'auto';
           circle.classList.add('drawing-poi');
+          
+          // Click handler for BOTH viewer and editor modes
+          circle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ns.state.selectedDrawingId = drawing.id;
+            ns.state.sidePanelVisible = true;
+            ns.renderDrawings();
+            ns.renderSidePanel();
+          });
           
           g.appendChild(circle);
           drawingLayer.appendChild(g);
           
-          // Handle for dragging (visible only when selected)
+          // Handle for dragging (visible only when selected in editor mode)
           if (isEditor && isSelected) {
             const handle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             handle.setAttribute('cx', (drawing.x * vw / 100) + '');
@@ -290,6 +355,7 @@
             handle.setAttribute('fill', '#3b82f6');
             handle.setAttribute('stroke', '#fff');
             handle.setAttribute('stroke-width', '2');
+            handle.setAttribute('shape-rendering', 'geometricPrecision');
             handle.style.cursor = 'move';
             handle.style.pointerEvents = 'auto';
             handle.classList.add('drawing-handle');
@@ -348,6 +414,10 @@
             label.setAttribute('text-anchor', 'middle');
             label.setAttribute('dominant-baseline', 'middle');
             label.setAttribute('pointer-events', isEditor ? 'auto' : 'none'); // Editor modunda tıklanabilir
+            // Anti-aliasing for text
+            label.setAttribute('text-rendering', 'geometricPrecision');
+            label.style.fontSmooth = 'always';
+            label.style.webkitFontSmoothing = 'antialiased';
             label.style.cursor = isEditor ? 'move' : 'default';
             label.classList.add('drawing-label');
             label.dataset.drawingId = drawing.id;
@@ -368,6 +438,7 @@
             rect.setAttribute('stroke', '#374151');
             rect.setAttribute('stroke-width', '1');
             rect.setAttribute('rx', '4');
+            rect.setAttribute('shape-rendering', 'geometricPrecision');
             rect.setAttribute('pointer-events', isEditor ? 'auto' : 'none');
             rect.style.cursor = isEditor ? 'move' : 'default';
             rect.classList.add('drawing-label-bg');
@@ -427,6 +498,7 @@
       line.setAttribute('stroke-width', '2');
       line.setAttribute('opacity', '0.6');
       line.setAttribute('stroke-dasharray', '5,5');
+      line.setAttribute('shape-rendering', 'geometricPrecision');
       line.classList.add('drawing-preview');
       drawingLayer.appendChild(line);
     } else if (drawingState.type === 'curve' && drawingState.points && drawingState.points.length > 0) {
@@ -440,6 +512,7 @@
         circle.setAttribute('r', '4');
         circle.setAttribute('fill', '#ffcc00');
         circle.setAttribute('opacity', '0.9');
+        circle.setAttribute('shape-rendering', 'geometricPrecision');
         circle.classList.add('drawing-preview');
         drawingLayer.appendChild(circle);
         
@@ -452,6 +525,7 @@
         text.setAttribute('fill', '#ffffff');
         text.setAttribute('font-size', '11');
         text.setAttribute('font-weight', 'bold');
+        text.setAttribute('text-rendering', 'geometricPrecision');
         text.textContent = String(idx + 1);
         text.classList.add('drawing-preview');
         drawingLayer.appendChild(text);
@@ -491,6 +565,7 @@
         path.setAttribute('fill', 'none');
         path.setAttribute('opacity', '0.6');
         path.setAttribute('stroke-dasharray', '5,5');
+        path.setAttribute('shape-rendering', 'geometricPrecision');
         path.setAttribute('pointer-events', 'stroke');
         path.classList.add('drawing-preview');
         drawingLayer.appendChild(path);

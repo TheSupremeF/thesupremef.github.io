@@ -11,7 +11,12 @@
         mainImage.src = ns.state.mainImageUrl;
         mainImage.onload = () => {
           ns.setTransform();
-          ns.renderHotspots();
+          // Use handleLayoutUpdate to ensure proper sizing
+          if (typeof ns.handleLayoutUpdate === 'function') {
+            ns.handleLayoutUpdate();
+          } else {
+            ns.renderHotspots();
+          }
           ns.renderSidePanel();
           if (typeof ns.resetHistory === 'function') ns.resetHistory();
         };
@@ -71,6 +76,14 @@
       ns.state.offsetY = my - contentY * newScale;
       ns.state.scale = newScale;
       ns.setTransform();
+      
+      // Redraw with new scale
+      if (typeof ns.renderDrawings === 'function') {
+        ns.renderDrawings();
+      }
+      if (typeof ns.renderHotspots === 'function') {
+        ns.renderHotspots();
+      }
     }, { passive: false });
 
     let panState = null;

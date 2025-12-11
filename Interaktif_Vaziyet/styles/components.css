@@ -454,6 +454,11 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
+  /* Anti-aliasing düzeltmeleri */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 .hotspot {
@@ -464,6 +469,11 @@
   cursor: move;
   transition: box-shadow 0.12s ease-out, border-color 0.12s ease-out, background 0.12s ease-out;
   border-style: solid;
+  /* Anti-aliasing düzeltmeleri */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .hotspot.selected {
@@ -491,6 +501,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+  /* Anti-aliasing düzeltmeleri - metin kalitesi */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* Resize handles */
@@ -503,6 +521,11 @@
   border: 1px solid #111827;
   cursor: nwse-resize;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  /* Anti-aliasing düzeltmeleri */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .handle.nw { top: -4px; left: -4px; cursor: nwse-resize; }
@@ -1046,6 +1069,11 @@
 /* Drawing Layer */
 #drawingLayer {
   pointer-events: auto;
+  /* SVG anti-aliasing düzeltmeleri */
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 #drawingLayer line,
@@ -1053,11 +1081,31 @@
   stroke-width: 2;
   fill: none;
   pointer-events: stroke;
+  /* SVG çizgi kalitesi */
+  shape-rendering: geometricPrecision;
+}
+
+#drawingLayer polygon {
+  shape-rendering: geometricPrecision;
+}
+
+#drawingLayer circle {
+  shape-rendering: geometricPrecision;
+}
+
+#drawingLayer text {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Text Layer */
 #textLayer {
   pointer-events: auto;
+  /* Anti-aliasing düzeltmeleri */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 #textLayer .draw-text {
@@ -1074,6 +1122,14 @@
   transition: background 0.15s, transform 0.08s ease, box-shadow 0.15s ease;
   white-space: nowrap;
   min-width: 20px;
+  /* Anti-aliasing düzeltmeleri - metin kalitesi */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 #textLayer .draw-text:hover {

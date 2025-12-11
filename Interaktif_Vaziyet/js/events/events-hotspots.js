@@ -291,8 +291,6 @@
     
     // Cancel curve drawing
     function cancelCurveDrawing() {
-      if (!curveDrawing) return;
-      
       // Hide drawing mode toolbar
       if (ns.dom.drawingModeToolbar) {
         ns.dom.drawingModeToolbar.style.display = 'none';
@@ -307,13 +305,13 @@
       curveDrawing = null;
       ns.renderDrawings(); // Clear preview
       ns.state.drawMode = null;
-      ns.dom.drawCurveBtn.classList.remove('toggle-active');
+      if (ns.dom.drawCurveBtn) {
+        ns.dom.drawCurveBtn.classList.remove('toggle-active');
+      }
     }
     
     // Cancel polygon drawing
     function cancelPolygonDrawing() {
-      if (!polygonDrawing) return;
-      
       // Hide drawing mode toolbar
       if (ns.dom.drawingModeToolbar) {
         ns.dom.drawingModeToolbar.style.display = 'none';
@@ -328,7 +326,9 @@
       polygonDrawing = null;
       ns.renderDrawings();
       ns.state.drawMode = null;
-      ns.dom.drawPolygonBtn.classList.remove('toggle-active');
+      if (ns.dom.drawPolygonBtn) {
+        ns.dom.drawPolygonBtn.classList.remove('toggle-active');
+      }
     }
     
     // Eğri çizimini double-click ile bitir
