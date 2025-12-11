@@ -22,6 +22,7 @@
     lastExportAt: null,
     editorPassword: '',
     editorUnlocked: true,
+    selectedDrawingId: null, // Seçili çizim/polygon ID'si
     projectInfo: { 
       name: '', 
       contractor: '',

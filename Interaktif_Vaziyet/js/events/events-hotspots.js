@@ -8,38 +8,373 @@
     let drawState = null;
     let lineDrawing = null;
     let curveDrawing = null;
+    let polygonDrawing = null;
     let selectedDrawing = null;
+    
+    // Helper function to render curve preview
+    function renderCurvePreview() {
+      if (!curveDrawing || !curveDrawing.points || curveDrawing.points.length === 0) return;
+      
+      const { drawingLayer, viewport } = ns.dom;
+      if (!drawingLayer || !viewport) return;
+      
+      const vw = viewport.offsetWidth;
+      const vh = viewport.offsetHeight;
+      
+      // Remove old preview elements
+      const oldPreviews = drawingLayer.querySelectorAll('.curve-preview-point, .curve-preview-path, .curve-preview-label');
+      oldPreviews.forEach(el => el.remove());
+      
+      // Render points
+      curveDrawing.points.forEach((point, idx) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', (point.x * vw / 100) + '');
+        circle.setAttribute('cy', (point.y * vh / 100) + '');
+        circle.setAttribute('r', '4');
+        circle.setAttribute('fill', '#ffcc00');
+        circle.classList.add('curve-preview-point');
+        drawingLayer.appendChild(circle);
+        
+        // Nokta numarası
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', (point.x * vw / 100) + '');
+        text.setAttribute('y', (point.y * vh / 100) + '');
+        text.setAttribute('dx', '8');
+        text.setAttribute('dy', '4');
+        text.setAttribute('fill', '#ffffff');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = String(idx + 1);
+        text.classList.add('curve-preview-label');
+        drawingLayer.appendChild(text);
+      });
+      
+      // Render curve if we have 2+ points
+      if (curveDrawing.points.length >= 2) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const pts = curveDrawing.points;
+        let d = `M ${pts[0].x * vw / 100} ${pts[0].y * vh / 100}`;
+        
+        if (pts.length === 2) {
+          d += ` L ${pts[1].x * vw / 100} ${pts[1].y * vh / 100}`;
+        } else {
+          for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = i === 0 ? pts[0] : pts[i - 1];
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const p3 = i + 2 < pts.length ? pts[i + 2] : pts[pts.length - 1];
+            
+            const cp1x = (p1.x + (p2.x - p0.x) / 6) * vw / 100;
+            const cp1y = (p1.y + (p2.y - p0.y) / 6) * vh / 100;
+            const cp2x = (p2.x - (p3.x - p1.x) / 6) * vw / 100;
+            const cp2y = (p2.y - (p3.y - p1.y) / 6) * vh / 100;
+            
+            d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x * vw / 100} ${p2.y * vh / 100}`;
+          }
+        }
+        
+        path.setAttribute('d', d);
+        path.setAttribute('stroke', '#60a5fa');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('fill', 'none');
+        path.classList.add('curve-preview-path');
+        drawingLayer.appendChild(path);
+      }
+    }
+    
+    // Helper function to render polygon preview
+    function renderPolygonPreview() {
+      if (!polygonDrawing || !polygonDrawing.points || polygonDrawing.points.length === 0) return;
+      
+      const { drawingLayer, viewport } = ns.dom;
+      if (!drawingLayer || !viewport) return;
+      
+      const vw = viewport.offsetWidth;
+      const vh = viewport.offsetHeight;
+      
+      // Remove old preview elements
+      const oldPreviews = drawingLayer.querySelectorAll('.polygon-preview-point, .polygon-preview-line, .polygon-preview-label');
+      oldPreviews.forEach(el => el.remove());
+      
+      // Render points
+      polygonDrawing.points.forEach((point, idx) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', (point.x * vw / 100) + '');
+        circle.setAttribute('cy', (point.y * vh / 100) + '');
+        circle.setAttribute('r', '4');
+        circle.setAttribute('fill', '#a855f7'); // Purple color for polygon points
+        circle.classList.add('polygon-preview-point');
+        drawingLayer.appendChild(circle);
+        
+        // Nokta numarası
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', (point.x * vw / 100) + '');
+        text.setAttribute('y', (point.y * vh / 100) + '');
+        text.setAttribute('dx', '8');
+        text.setAttribute('dy', '4');
+        text.setAttribute('fill', '#ffffff');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = String(idx + 1);
+        text.classList.add('polygon-preview-label');
+        drawingLayer.appendChild(text);
+      });
+      
+      // Render lines if we have 2+ points
+      if (polygonDrawing.points.length >= 2) {
+        const pts = polygonDrawing.points;
+        for (let i = 0; i < pts.length - 1; i++) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', (pts[i].x * vw / 100) + '');
+          line.setAttribute('y1', (pts[i].y * vh / 100) + '');
+          line.setAttribute('x2', (pts[i + 1].x * vw / 100) + '');
+          line.setAttribute('y2', (pts[i + 1].y * vh / 100) + '');
+          line.setAttribute('stroke', '#a855f7'); // Purple color for polygon lines
+          line.setAttribute('stroke-width', '2');
+          line.classList.add('polygon-preview-line');
+          drawingLayer.appendChild(line);
+        }
+        
+        // Close the loop with 3+ points (preview closing line)
+        if (pts.length >= 3) {
+          const closingLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          closingLine.setAttribute('x1', (pts[pts.length - 1].x * vw / 100) + '');
+          closingLine.setAttribute('y1', (pts[pts.length - 1].y * vh / 100) + '');
+          closingLine.setAttribute('x2', (pts[0].x * vw / 100) + '');
+          closingLine.setAttribute('y2', (pts[0].y * vh / 100) + '');
+          closingLine.setAttribute('stroke', '#a855f7');
+          closingLine.setAttribute('stroke-width', '2');
+          closingLine.setAttribute('stroke-dasharray', '5,5'); // Dashed to show it's the closing edge
+          closingLine.classList.add('polygon-preview-line');
+          drawingLayer.appendChild(closingLine);
+        }
+      }
+    }
 
     canvasWrapper.addEventListener('click', e => {
-      if (lineDrawing || curveDrawing) return;
+      // Text, line, curve, or polygon çizimindeyken boş alan tıklamayı devre dışı bırak
+      if (lineDrawing || curveDrawing || polygonDrawing || ns.state.drawMode === 'text') return;
       
-      if (!e.target.closest('.hotspot') && 
-          !e.target.closest('.draw-text') &&
-          !e.target.closest('line') &&
-          !e.target.closest('path')) {
-        ns.state.selectedIds.clear();
-        ns.state.showSummary = false;
-        ns.state.showReadyPanel = false;
-        ns.state.showIssuesPanel = false;
-        ns.state.sidePanelVisible = false;
-        selectedDrawing = null;
+      // Hotspot, text veya çizim elementine tıklanmış mı?
+      if (e.target.closest('.hotspot') || 
+          e.target.closest('.draw-text') ||
+          e.target.classList.contains('drawing-line') ||
+          e.target.classList.contains('drawing-curve') ||
+          e.target.classList.contains('drawing-handle')) {
+        // Bir şeye tıklanmış, sidepanel'i kapatma
+        return;
+      }
+      
+      // Boş alana tıklanmış, her şeyi temizle
+      ns.state.selectedIds.clear();
+      ns.state.selectedDrawingId = null;
+      ns.state.showSummary = false;
+      ns.state.showReadyPanel = false;
+      ns.state.showIssuesPanel = false;
+      ns.state.sidePanelVisible = false;
+      selectedDrawing = null;
+      
+      // Butonları untoggle et
+      const { summaryBtn, readyBtn, issuesBtn } = ns.dom;
+      if (summaryBtn) summaryBtn.classList.remove('toggle-active');
+      if (readyBtn) readyBtn.classList.remove('toggle-active');
+      if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+      
+      ns.renderHotspots();
+      ns.renderSidePanel();
+    });
+
+    // Eğri çizimini tamamla (ortak fonksiyon)
+    function completeCurveDrawing() {
+      if (!curveDrawing || !curveDrawing.isDrawing) return;
+      
+      curveDrawing.isDrawing = false;
+      
+      // Hide drawing mode toolbar
+      if (ns.dom.drawingModeToolbar) {
+        ns.dom.drawingModeToolbar.style.display = 'none';
+      }
+      
+      if (curveDrawing.points.length > 1) {
+        ns.state.drawings = ns.state.drawings || [];
         
-        // Butonları untoggle et
-        const { summaryBtn, readyBtn, issuesBtn } = ns.dom;
-        if (summaryBtn) summaryBtn.classList.remove('toggle-active');
-        if (readyBtn) readyBtn.classList.remove('toggle-active');
-        if (issuesBtn) issuesBtn.classList.remove('toggle-active');
+        // Otomatik ID oluştur
+        const curveCount = ns.state.drawings.filter(d => d.type === 'curve').length + 1;
+        const autoTitle = `Eğri ${curveCount}`;
         
-        ns.renderHotspots();
+        const newCurve = {
+          id: 'draw-' + Date.now(),
+          type: 'curve',
+          points: curveDrawing.points,
+          lineType: 'diger',
+          title: autoTitle,
+          description: '',
+          photos: [],
+          color: '#eab308',
+          width: 2
+        };
+        ns.state.drawings.push(newCurve);
+        ns.pushHistory('addCurve');
+        
+        // Yeni eğriyi seç ve sidepanel'de göster
+        ns.state.selectedDrawingId = newCurve.id;
+        ns.state.sidePanelVisible = true;
         ns.renderSidePanel();
       }
+      
+      // Clear curve preview elements
+      if (ns.dom.drawingLayer) {
+        const previews = ns.dom.drawingLayer.querySelectorAll('.curve-preview-point, .curve-preview-path, .curve-preview-label');
+        previews.forEach(el => el.remove());
+      }
+      
+      curveDrawing = null;
+      ns.renderDrawings();
+      ns.state.drawMode = null;
+      ns.dom.drawCurveBtn.classList.remove('toggle-active');
+    }
+    
+    // Poligon çizimini tamamla
+    function completePolygonDrawing() {
+      if (!polygonDrawing || !polygonDrawing.isDrawing) return;
+      
+      polygonDrawing.isDrawing = false;
+      
+      // Hide drawing mode toolbar
+      if (ns.dom.drawingModeToolbar) {
+        ns.dom.drawingModeToolbar.style.display = 'none';
+      }
+      
+      if (polygonDrawing.points.length >= 3) {
+        ns.state.drawings = ns.state.drawings || [];
+        
+        // Otomatik ID oluştur
+        const polygonCount = ns.state.drawings.filter(d => d.type === 'polygon').length + 1;
+        const autoTitle = `Poligon ${polygonCount}`;
+        
+        const newPolygon = {
+          id: 'draw-' + Date.now(),
+          type: 'polygon',
+          points: polygonDrawing.points,
+          lineType: 'diger',
+          title: autoTitle,
+          description: '',
+          photos: [],
+          // Stroke (outline) properties
+          strokeColor: '#a855f7',
+          strokeOpacity: 1,
+          width: 2,
+          // Fill properties
+          fillColor: '#a855f7',
+          fillOpacity: 0.3
+        };
+        ns.state.drawings.push(newPolygon);
+        ns.pushHistory('addPolygon');
+        
+        // Yeni poligonu seç ve sidepanel'de göster
+        ns.state.selectedDrawingId = newPolygon.id;
+        ns.state.sidePanelVisible = true;
+        ns.renderSidePanel();
+      }
+      
+      // Clear polygon preview elements
+      if (ns.dom.drawingLayer) {
+        const previews = ns.dom.drawingLayer.querySelectorAll('.polygon-preview-point, .polygon-preview-line, .polygon-preview-label');
+        previews.forEach(el => el.remove());
+      }
+      
+      polygonDrawing = null;
+      ns.renderDrawings();
+      ns.state.drawMode = null;
+      ns.dom.drawPolygonBtn.classList.remove('toggle-active');
+    }
+    
+    // Cancel curve drawing
+    function cancelCurveDrawing() {
+      if (!curveDrawing) return;
+      
+      // Hide drawing mode toolbar
+      if (ns.dom.drawingModeToolbar) {
+        ns.dom.drawingModeToolbar.style.display = 'none';
+      }
+      
+      // Clear curve preview elements
+      if (ns.dom.drawingLayer) {
+        const previews = ns.dom.drawingLayer.querySelectorAll('.curve-preview-point, .curve-preview-path, .curve-preview-label');
+        previews.forEach(el => el.remove());
+      }
+      
+      curveDrawing = null;
+      ns.renderDrawings(); // Clear preview
+      ns.state.drawMode = null;
+      ns.dom.drawCurveBtn.classList.remove('toggle-active');
+    }
+    
+    // Cancel polygon drawing
+    function cancelPolygonDrawing() {
+      if (!polygonDrawing) return;
+      
+      // Hide drawing mode toolbar
+      if (ns.dom.drawingModeToolbar) {
+        ns.dom.drawingModeToolbar.style.display = 'none';
+      }
+      
+      // Clear polygon preview elements
+      if (ns.dom.drawingLayer) {
+        const previews = ns.dom.drawingLayer.querySelectorAll('.polygon-preview-point, .polygon-preview-line, .polygon-preview-label');
+        previews.forEach(el => el.remove());
+      }
+      
+      polygonDrawing = null;
+      ns.renderDrawings();
+      ns.state.drawMode = null;
+      ns.dom.drawPolygonBtn.classList.remove('toggle-active');
+    }
+    
+    // Eğri çizimini double-click ile bitir
+    canvasWrapper.addEventListener('dblclick', e => {
+      if (curveDrawing && curveDrawing.isDrawing) {
+        e.preventDefault();
+        e.stopPropagation();
+        completeCurveDrawing();
+      } else if (polygonDrawing && polygonDrawing.isDrawing) {
+        e.preventDefault();
+        e.stopPropagation();
+        completePolygonDrawing();
+      }
     });
+    
+    // Wire up drawing mode toolbar buttons (works for both curves and polygons)
+    if (ns.dom.confirmDrawingBtn) {
+      ns.dom.confirmDrawingBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (curveDrawing) {
+          completeCurveDrawing();
+        } else if (polygonDrawing) {
+          completePolygonDrawing();
+        }
+      });
+    }
+    
+    if (ns.dom.cancelDrawingBtn) {
+      ns.dom.cancelDrawingBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (curveDrawing) {
+          cancelCurveDrawing();
+        } else if (polygonDrawing) {
+          cancelPolygonDrawing();
+        }
+      });
+    }
 
     canvasWrapper.addEventListener('mousedown', e => {
       if (ns.state.mode !== 'editor') return;
       if (ns.state.panMode) return;
       
-      if (e.target.closest('.hotspot') || e.target.closest('.draw-text')) return;
+      // Çizim modundaysak, hotspot ve handle kontrollerini bypass et
+      if (!ns.state.drawMode && (e.target.closest('.hotspot') || e.target.closest('.draw-text'))) return;
 
       const viewportRect = ns.dom.viewport.getBoundingClientRect();
       const relX = ((e.clientX - viewportRect.left) / viewportRect.width) * 100;
@@ -55,55 +390,128 @@
         e.stopPropagation();
         e.preventDefault();
       } else if (ns.state.drawMode === 'curve') {
-        curveDrawing = {
-          points: [{ x: relX, y: relY }],
-          isDrawing: true
-        };
+        // Check if click is on drawing toolbar - don't add point
+        if (e.target.closest('#drawingModeToolbar') || e.target.closest('.curve-toolbar')) {
+          return;
+        }
+        
+        // HER TIKLAMADA NOKTA EKLE
+        if (!curveDrawing) {
+          curveDrawing = {
+            points: [],
+            isDrawing: true
+          };
+          
+          // Show drawing mode toolbar when first point is added
+          if (ns.dom.drawingModeToolbar) {
+            ns.dom.drawingModeToolbar.style.display = 'flex';
+          }
+        }
+        
+        // Nokta ekle - viewport'a göre hesapla
+        const vw = ns.dom.viewport.offsetWidth;
+        const vh = ns.dom.viewport.offsetHeight;
+        curveDrawing.points.push({ x: relX, y: relY });
+        
+        // Manually render just the preview without clearing everything
+        // This keeps points visible
+        renderCurvePreview();
+        
+        e.stopPropagation();
+        e.preventDefault();
+      } else if (ns.state.drawMode === 'polygon') {
+        // Check if click is on drawing toolbar - don't add point
+        if (e.target.closest('#drawingModeToolbar') || e.target.closest('.curve-toolbar')) {
+          return;
+        }
+        
+        // HER TIKLAMADA KÖŞE EKLE
+        if (!polygonDrawing) {
+          polygonDrawing = {
+            points: [],
+            isDrawing: true
+          };
+          
+          // Show drawing mode toolbar when first point is added
+          if (ns.dom.drawingModeToolbar) {
+            ns.dom.drawingModeToolbar.style.display = 'flex';
+          }
+        }
+        
+        // Köşe ekle - viewport'a göre hesapla
+        const vw = ns.dom.viewport.offsetWidth;
+        const vh = ns.dom.viewport.offsetHeight;
+        polygonDrawing.points.push({ x: relX, y: relY });
+        
+        // Manually render just the preview without clearing everything
+        // This keeps points visible
+        renderPolygonPreview();
+        
         e.stopPropagation();
         e.preventDefault();
       } else if (ns.state.drawMode === 'text') {
-        const textDiv = document.createElement('div');
-        textDiv.className = 'draw-text editing';
-        textDiv.contentEditable = true;
-        textDiv.style.left = relX + '%';
-        textDiv.style.top = relY + '%';
-        textDiv.style.minWidth = '50px';
-        textDiv.textContent = 'Metin';
-        textLayer.appendChild(textDiv);
+        // Create label as a drawing object
+        ns.state.drawings = ns.state.drawings || [];
         
-        textDiv.focus();
-        document.execCommand('selectAll', false, null);
+        const labelCount = ns.state.drawings.filter(d => d.type === 'label').length + 1;
+        const autoTitle = `Etiket ${labelCount}`;
         
-        textDiv.addEventListener('blur', () => {
-          const text = textDiv.textContent.trim();
-          if (text) {
-            ns.state.texts = ns.state.texts || [];
-            ns.state.texts.push({
-              id: 'text-' + Date.now(),
-              x: relX,
-              y: relY,
-              text: text,
-              color: '#eab308',
-              fontSize: 14
-            });
-            ns.pushHistory('addText');
-          }
-          textDiv.remove();
-          ns.renderDrawings();
-        });
+        const newLabel = {
+          id: 'draw-' + Date.now(),
+          type: 'label',
+          x: relX,
+          y: relY,
+          text: 'Yeni Etiket',
+          title: autoTitle,
+          description: '',
+          color: '#eab308',
+          fontSize: 14,
+          fontWeight: 'normal'
+        };
         
-        textDiv.addEventListener('keydown', e => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            textDiv.blur();
-          }
-          if (e.key === 'Escape') {
-            textDiv.remove();
-          }
-        });
+        ns.state.drawings.push(newLabel);
+        ns.pushHistory('addLabel');
         
-        ns.state.drawMode = null;
-        ns.dom.addTextBtn.classList.remove('toggle-active');
+        // Select the new label
+        ns.state.selectedDrawingId = newLabel.id;
+        ns.state.selectedIds.clear();
+        ns.state.sidePanelVisible = true;
+        ns.renderSidePanel();
+        ns.renderDrawings();
+        
+        e.stopPropagation();
+        e.preventDefault();
+      } else if (ns.state.drawMode === 'poi') {
+        // Create POI as a drawing object
+        ns.state.drawings = ns.state.drawings || [];
+        
+        const poiCount = ns.state.drawings.filter(d => d.type === 'poi').length + 1;
+        const autoTitle = `Nokta ${poiCount}`;
+        
+        const newPoi = {
+          id: 'draw-' + Date.now(),
+          type: 'poi',
+          x: relX,
+          y: relY,
+          title: autoTitle,
+          description: '',
+          strokeColor: '#3b82f6',
+          strokeOpacity: 1,
+          fillColor: '#3b82f6',
+          fillOpacity: 0.3,
+          radius: 8
+        };
+        
+        ns.state.drawings.push(newPoi);
+        ns.pushHistory('addPoi');
+        
+        // Select the new POI
+        ns.state.selectedDrawingId = newPoi.id;
+        ns.state.selectedIds.clear();
+        ns.state.sidePanelVisible = true;
+        ns.renderSidePanel();
+        ns.renderDrawings();
+        
         e.stopPropagation();
         e.preventDefault();
       }
@@ -118,158 +526,93 @@
         lineDrawing.endX = relX;
         lineDrawing.endY = relY;
         
-        drawingLayer.innerHTML = '';
-        ns.state.drawings.forEach(d => {
-          if (d.type === 'line') {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', d.x1 + '%');
-            line.setAttribute('y1', d.y1 + '%');
-            line.setAttribute('x2', d.x2 + '%');
-            line.setAttribute('y2', d.y2 + '%');
-            line.setAttribute('stroke', d.color || '#eab308');
-            line.setAttribute('stroke-width', d.width || 2);
-            line.style.cursor = 'pointer';
-            drawingLayer.appendChild(line);
-          } else if (d.type === 'curve') {
-            if (d.points && d.points.length > 1) {
-              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              let pathD = `M ${d.points[0].x} ${d.points[0].y}`;
-              for (let i = 1; i < d.points.length; i++) {
-                pathD += ` L ${d.points[i].x} ${d.points[i].y}`;
-              }
-              path.setAttribute('d', pathD);
-              path.setAttribute('stroke', d.color || '#eab308');
-              path.setAttribute('stroke-width', d.width || 2);
-              path.setAttribute('fill', 'none');
-              path.style.cursor = 'pointer';
-              drawingLayer.appendChild(path);
-            }
-          }
+        // Preview render
+        ns.renderDrawingPreview({
+          type: 'line',
+          startX: lineDrawing.startX,
+          startY: lineDrawing.startY,
+          endX: lineDrawing.endX,
+          endY: lineDrawing.endY
         });
-        
-        const previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        previewLine.setAttribute('x1', lineDrawing.startX + '%');
-        previewLine.setAttribute('y1', lineDrawing.startY + '%');
-        previewLine.setAttribute('x2', lineDrawing.endX + '%');
-        previewLine.setAttribute('y2', lineDrawing.endY + '%');
-        previewLine.setAttribute('stroke', '#eab308');
-        previewLine.setAttribute('stroke-width', '2');
-        previewLine.setAttribute('opacity', '0.6');
-        previewLine.setAttribute('stroke-dasharray', '5,5');
-        drawingLayer.appendChild(previewLine);
       }
       
-      if (curveDrawing && curveDrawing.isDrawing) {
-        const viewportRect = ns.dom.viewport.getBoundingClientRect();
-        const relX = ((e.clientX - viewportRect.left) / viewportRect.width) * 100;
-        const relY = ((e.clientY - viewportRect.top) / viewportRect.height) * 100;
-        
-        const lastPoint = curveDrawing.points[curveDrawing.points.length - 1];
-        const dist = Math.sqrt(Math.pow(relX - lastPoint.x, 2) + Math.pow(relY - lastPoint.y, 2));
-        if (dist > 0.5) {
-          curveDrawing.points.push({ x: relX, y: relY });
-        }
-        
-        drawingLayer.innerHTML = '';
-        ns.state.drawings.forEach(d => {
-          if (d.type === 'line') {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', d.x1 + '%');
-            line.setAttribute('y1', d.y1 + '%');
-            line.setAttribute('x2', d.x2 + '%');
-            line.setAttribute('y2', d.y2 + '%');
-            line.setAttribute('stroke', d.color || '#eab308');
-            line.setAttribute('stroke-width', d.width || 2);
-            line.style.cursor = 'pointer';
-            drawingLayer.appendChild(line);
-          } else if (d.type === 'curve') {
-            if (d.points && d.points.length > 1) {
-              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              let pathD = `M ${d.points[0].x} ${d.points[0].y}`;
-              for (let i = 1; i < d.points.length; i++) {
-                pathD += ` L ${d.points[i].x} ${d.points[i].y}`;
-              }
-              path.setAttribute('d', pathD);
-              path.setAttribute('stroke', d.color || '#eab308');
-              path.setAttribute('stroke-width', d.width || 2);
-              path.setAttribute('fill', 'none');
-              path.style.cursor = 'pointer';
-              drawingLayer.appendChild(path);
-            }
-          }
-        });
-        
-        if (curveDrawing.points.length > 1) {
-          const previewPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          let pathD = `M ${curveDrawing.points[0].x} ${curveDrawing.points[0].y}`;
-          for (let i = 1; i < curveDrawing.points.length; i++) {
-            pathD += ` L ${curveDrawing.points[i].x} ${curveDrawing.points[i].y}`;
-          }
-          previewPath.setAttribute('d', pathD);
-          previewPath.setAttribute('stroke', '#eab308');
-          previewPath.setAttribute('stroke-width', '2');
-          previewPath.setAttribute('fill', 'none');
-          previewPath.setAttribute('opacity', '0.6');
-          drawingLayer.appendChild(previewPath);
-        }
-      }
+      // Eğri çizimi artık tıklayarak yapılıyor, mousemove'da nokta eklemiyoruz
     });
 
     document.addEventListener('mouseup', e => {
       if (lineDrawing) {
         ns.state.drawings = ns.state.drawings || [];
-        ns.state.drawings.push({
+        
+        // Otomatik ID oluştur
+        const lineCount = ns.state.drawings.filter(d => d.type === 'line').length + 1;
+        const autoTitle = `Çizgi ${lineCount}`;
+        
+        const newLine = {
           id: 'draw-' + Date.now(),
           type: 'line',
           x1: lineDrawing.startX,
           y1: lineDrawing.startY,
           x2: lineDrawing.endX,
           y2: lineDrawing.endY,
+          lineType: 'diger',
+          title: autoTitle,
+          description: '',
+          photos: [],
           color: '#eab308',
           width: 2
-        });
+        };
+        ns.state.drawings.push(newLine);
         ns.pushHistory('addLine');
         lineDrawing = null;
         ns.renderDrawings();
         ns.state.drawMode = null;
         ns.dom.drawLineBtn.classList.remove('toggle-active');
+        
+        // Yeni çizgiyi seç ve sidepanel'de göster
+        ns.state.selectedDrawingId = newLine.id;
+        ns.state.sidePanelVisible = true;
+        ns.renderSidePanel();
       }
       
+      // Curve çizimi mouseup'ta bitmiyor - double-click ile bitecek
+      // Sadece drawing durumunu durdur
       if (curveDrawing) {
-        curveDrawing.isDrawing = false;
-        if (curveDrawing.points.length > 1) {
-          ns.state.drawings = ns.state.drawings || [];
-          ns.state.drawings.push({
-            id: 'draw-' + Date.now(),
-            type: 'curve',
-            points: curveDrawing.points,
-            color: '#eab308',
-            width: 2
-          });
-          ns.pushHistory('addCurve');
-        }
-        curveDrawing = null;
-        ns.renderDrawings();
-        ns.state.drawMode = null;
-        ns.dom.drawCurveBtn.classList.remove('toggle-active');
+        // isDrawing durumunu false yapmıyoruz ki çizime devam edebilsin
+        // Double-click ile bitecek
       }
     });
 
     drawingLayer.addEventListener('click', e => {
       if (ns.state.mode !== 'editor') return;
       
-      const line = e.target.closest('line');
-      const path = e.target.closest('path');
+      // SVG element traversal helper
+      function findParentG(element) {
+        let current = element;
+        while (current && current !== drawingLayer) {
+          if (current.tagName === 'g') {
+            return current;
+          }
+          current = current.parentElement || current.parentNode;
+        }
+        return null;
+      }
+      
+      const line = e.target.tagName === 'line' ? e.target : null;
+      const path = e.target.tagName === 'path' ? e.target : null;
       
       if (line || path) {
-        const idx = Array.from(drawingLayer.children).indexOf(line || path);
-        if (idx >= 0 && idx < ns.state.drawings.length) {
-          selectedDrawing = ns.state.drawings[idx];
+        const g = findParentG(line || path);
+        if (g && g.dataset.drawingId) {
+          const drawingId = g.dataset.drawingId;
+          const drawing = ns.state.drawings.find(d => d.id === drawingId);
           
-          if (confirm('Bu çizimi silmek ister misiniz?')) {
-            ns.state.drawings.splice(idx, 1);
-            ns.pushHistory('deleteDrawing');
-            ns.renderDrawings();
+          if (drawing) {
+            // Çizimi seç ve sidepanel'de göster
+            ns.state.selectedDrawingId = drawing.id;
+            ns.state.selectedIds.clear(); // Hotspot seçimini temizle
+            ns.state.sidePanelVisible = true;
+            ns.renderSidePanel();
+            ns.renderDrawings(); // Seçim highlight'ı için
           }
         }
       }

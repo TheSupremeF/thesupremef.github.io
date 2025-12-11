@@ -25,7 +25,7 @@
   --accent-soft: rgba(34, 197, 94, 0.14);
 
   --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.85);
-  --shadow-header: 0 10px 30px rgba(15, 23, 42, 0.75);
+  --shadow-header: 0 4px 12px rgba(15, 23, 42, 0.5);
 }
 
 /* Optional explicit dark mode hook */
@@ -114,6 +114,7 @@ header {
   position: relative;
   z-index: 40;
   min-height: 48px;
+  isolation: isolate; /* Contain shadow and effects within this stacking context */
 }
 
 /* Altta ince bir highlight şeridi (yeşil-lacivert) */
@@ -321,7 +322,7 @@ aside {
   flex-direction: column;
   box-shadow: -16px 0 40px rgba(0, 0, 0, 0.75);
   border-left: 1px solid var(--border-subtle);
-  z-index: 30;
+  z-index: 45; /* Above header (40) to prevent header shadow from covering sidepanel */
   transition:
     right 0.3s ease-out,
     box-shadow 0.25s ease-out,
@@ -349,7 +350,7 @@ aside header {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.5);
-  z-index: 29;
+  z-index: 44; /* Between header (40) and aside (45) */
   display: none;
   transition: opacity 0.25s ease;
 }

@@ -3,7 +3,7 @@
 
   function wireToolbarButtons() {
     const { panModeBtn, labelsBtn, summaryBtn, readyBtn, issuesBtn, resetViewBtn } = ns.dom;
-    const { addBlockBtn, drawLineBtn, drawCurveBtn, addTextBtn } = ns.dom;
+    const { addBlockBtn, drawLineBtn, drawCurveBtn, drawPolygonBtn, addTextBtn } = ns.dom;
 
     panModeBtn.addEventListener('click', () => {
       ns.state.panMode = !ns.state.panMode;
@@ -14,6 +14,7 @@
       ns.state.showLabels = !ns.state.showLabels;
       labelsBtn.classList.toggle('toggle-active', ns.state.showLabels);
       ns.renderHotspots();
+      ns.renderDrawings(); // Çizgi/curve labellarını göster
     });
 
     summaryBtn.addEventListener('click', () => {
@@ -99,6 +100,67 @@
         ns.state.drawMode = isActive ? null : 'curve';
         drawCurveBtn.classList.toggle('toggle-active', !isActive);
         if (drawLineBtn) drawLineBtn.classList.remove('toggle-active');
+        if (drawPolygonBtn) drawPolygonBtn.classList.remove('toggle-active');
+        if (addTextBtn) addTextBtn.classList.remove('toggle-active');
+        
+        // Show/hide drawing mode toolbar with curve hint
+        if (ns.dom.drawingModeToolbar) {
+          ns.dom.drawingModeToolbar.style.display = (!isActive && ns.state.drawMode === 'curve') ? 'flex' : 'none';
+          if (ns.dom.drawingModeHint && !isActive) {
+            ns.dom.drawingModeHint.textContent = 'Nokta eklemek için tıklayın';
+          }
+        }
+        
+        // If turning off curve mode, clear any preview
+        if (isActive && ns.dom.drawingLayer) {
+          const previews = ns.dom.drawingLayer.querySelectorAll('.curve-preview-point, .curve-preview-path, .curve-preview-label, .polygon-preview-point, .polygon-preview-line');
+          previews.forEach(el => el.remove());
+        }
+      });
+    }
+
+    if (drawPolygonBtn) {
+      drawPolygonBtn.addEventListener('click', () => {
+        if (!ns.state.mainImageUrl) {
+          alert('Önce bir ana görsel yükleyin.');
+          return;
+        }
+        const isActive = ns.state.drawMode === 'polygon';
+        ns.state.drawMode = isActive ? null : 'polygon';
+        drawPolygonBtn.classList.toggle('toggle-active', !isActive);
+        if (drawLineBtn) drawLineBtn.classList.remove('toggle-active');
+        if (drawCurveBtn) drawCurveBtn.classList.remove('toggle-active');
+        if (addTextBtn) addTextBtn.classList.remove('toggle-active');
+        
+        // Show/hide drawing mode toolbar with polygon hint
+        if (ns.dom.drawingModeToolbar) {
+          ns.dom.drawingModeToolbar.style.display = (!isActive && ns.state.drawMode === 'polygon') ? 'flex' : 'none';
+          if (ns.dom.drawingModeHint && !isActive) {
+            ns.dom.drawingModeHint.textContent = 'Köşe eklemek için tıklayın';
+          }
+        }
+        
+        // If turning off polygon mode, clear any preview
+        if (isActive && ns.dom.drawingLayer) {
+          const previews = ns.dom.drawingLayer.querySelectorAll('.curve-preview-point, .curve-preview-path, .curve-preview-label, .polygon-preview-point, .polygon-preview-line');
+          previews.forEach(el => el.remove());
+        }
+      });
+    }
+
+    const { addPoiBtn } = ns.dom;
+    if (addPoiBtn) {
+      addPoiBtn.addEventListener('click', () => {
+        if (!ns.state.mainImageUrl) {
+          alert('Önce bir ana görsel yükleyin.');
+          return;
+        }
+        const isActive = ns.state.drawMode === 'poi';
+        ns.state.drawMode = isActive ? null : 'poi';
+        addPoiBtn.classList.toggle('toggle-active', !isActive);
+        if (drawLineBtn) drawLineBtn.classList.remove('toggle-active');
+        if (drawCurveBtn) drawCurveBtn.classList.remove('toggle-active');
+        if (drawPolygonBtn) drawPolygonBtn.classList.remove('toggle-active');
         if (addTextBtn) addTextBtn.classList.remove('toggle-active');
       });
     }
@@ -114,6 +176,8 @@
         addTextBtn.classList.toggle('toggle-active', !isActive);
         if (drawLineBtn) drawLineBtn.classList.remove('toggle-active');
         if (drawCurveBtn) drawCurveBtn.classList.remove('toggle-active');
+        if (drawPolygonBtn) drawPolygonBtn.classList.remove('toggle-active');
+        if (addPoiBtn) addPoiBtn.classList.remove('toggle-active');
       });
     }
   }

@@ -372,6 +372,80 @@
   color: #f9fafb;
 }
 
+/* Curve Toolbar (appears below draw-toolbar in curve mode) */
+.curve-toolbar {
+  position: absolute;
+  top: 230px; /* Below draw-toolbar */
+  left: 8px;
+  z-index: 20;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--cmp-bg-elevated);
+  border-radius: 12px;
+  border: 1px solid var(--cmp-border-subtle);
+  box-shadow: var(--cmp-shadow-soft);
+  backdrop-filter: blur(10px) saturate(130%);
+}
+
+.curve-toolbar button {
+  background: radial-gradient(circle at top, #111827 0%, #020617 80%);
+  border: 1px solid var(--cmp-border-strong);
+  color: var(--cmp-text-main);
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.08s ease, box-shadow 0.16s ease;
+}
+
+.curve-toolbar button:hover {
+  background: #020617;
+  border-color: var(--cmp-accent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+  transform: translateY(-1px);
+}
+
+.curve-toolbar button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.curve-toolbar button#confirmCurveBtn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 40%, #15803d 100%);
+  border-color: #16a34a;
+  color: #f9fafb;
+}
+
+.curve-toolbar button#confirmCurveBtn:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 40%, #14532d 100%);
+}
+
+.curve-toolbar button#cancelCurveBtn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 40%, #b91c1c 100%);
+  border-color: #dc2626;
+  color: #f9fafb;
+}
+
+.curve-toolbar button#cancelCurveBtn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 40%, #991b1b 100%);
+}
+
+.curve-toolbar-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  max-width: 100px;
+  line-height: 1.3;
+}
+
 /* Hotspot Layer & Elements */
 #hotspotLayer {
   position: absolute;

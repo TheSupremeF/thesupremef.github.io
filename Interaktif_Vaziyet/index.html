@@ -141,18 +141,35 @@
         <button id="drawLineBtn" title="Çizgi çiz">
           <span class="material-symbols-outlined">show_chart</span>
         </button>
-        <button id="drawCurveBtn" title="Eğri çiz">
+        <button id="drawCurveBtn" title="Eğri çiz (tıklayarak nokta ekle)">
           <span class="material-symbols-outlined">timeline</span>
         </button>
-        <button id="addTextBtn" title="Metin ekle">
+        <button id="drawPolygonBtn" title="Poligon çiz (tıklayarak köşe ekle)">
+          <span class="material-symbols-outlined">hexagon</span>
+        </button>
+        <button id="addPoiBtn" title="İlgi noktası ekle">
+          <span class="material-symbols-outlined">location_on</span>
+        </button>
+        <button id="addTextBtn" title="Etiket ekle">
           <span class="material-symbols-outlined">text_fields</span>
         </button>
+      </div>
+
+      <!-- Drawing mode toolbar (visible in curve/polygon mode) -->
+      <div class="curve-toolbar" id="drawingModeToolbar" style="display:none;">
+        <button id="confirmDrawingBtn" title="Tamamla">
+          <span class="material-symbols-outlined">check</span>
+        </button>
+        <button id="cancelDrawingBtn" title="İptal et">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <span class="curve-toolbar-hint" id="drawingModeHint">Nokta eklemek için tıklayın</span>
       </div>
 
       <div class="canvas-wrapper" id="canvasWrapper">
         <div id="viewport">
           <img id="mainImage" alt="Vaziyet planı">
-          <svg id="drawingLayer" style="position:absolute;top:0;left:0;pointer-events:none;width:100%;height:100%;"></svg>
+          <svg id="drawingLayer" style="position:absolute;top:0;left:0;pointer-events:auto;width:100%;height:100%;"></svg>
           <div id="textLayer" style="position:absolute;top:0;left:0;pointer-events:none;"></div>
           <div id="hotspotLayer"></div>
         </div>
@@ -329,6 +346,7 @@
   <script src="js/events/events-canvas.js"></script>
   <script src="js/events/events-io.js"></script>
   <script src="js/events/events-hotspots.js"></script>
+  <script src="js/events/events-drawing-drag.js"></script>
   <script src="js/events/events-shortcuts.js"></script>
   <!-- NCR Events -->
   <script src="js/events/events-ncr.js"></script>

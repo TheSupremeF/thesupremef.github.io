@@ -11,6 +11,10 @@
       hotspotLayer: document.getElementById('hotspotLayer'),
       canvasWrapper: document.getElementById('canvasWrapper'),
       viewport: document.getElementById('viewport'),
+      drawingModeToolbar: document.getElementById('drawingModeToolbar'),
+      confirmDrawingBtn: document.getElementById('confirmDrawingBtn'),
+      cancelDrawingBtn: document.getElementById('cancelDrawingBtn'),
+      drawingModeHint: document.getElementById('drawingModeHint'),
       modeToggle: document.getElementById('modeToggle'),
       sideBody: document.getElementById('sideBody'),
       asideEl: document.querySelector('aside'),
@@ -52,6 +56,8 @@
       addBlockBtn: document.getElementById('addBlockBtn'),
       drawLineBtn: document.getElementById('drawLineBtn'),
       drawCurveBtn: document.getElementById('drawCurveBtn'),
+      drawPolygonBtn: document.getElementById('drawPolygonBtn'),
+      addPoiBtn: document.getElementById('addPoiBtn'),
       addTextBtn: document.getElementById('addTextBtn'),
       drawingLayer: document.getElementById('drawingLayer'),
       textLayer: document.getElementById('textLayer')
@@ -186,6 +192,7 @@
     ns.wireExportImport();
     ns.wireZoomPan();
     ns.wireHotspotInteractions();
+    ns.wireDrawingDrag();
     ns.wireHistoryShortcuts();
     ns.wireResetToolbar();
     

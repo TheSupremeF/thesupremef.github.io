@@ -17,6 +17,12 @@
     if (asideEl) asideEl.classList.add('visible');
     /* if (backdrop) backdrop.classList.add('visible');*/
 
+    // Çizim/Polygon seçiliyse onun form'unu göster
+    if (ns.state.selectedDrawingId) {
+      ns.renderDrawingPanel();
+      return;
+    }
+
     if (ns.state.showSummary) {
       ns.renderSummaryPanel();
       return;
@@ -2322,5 +2328,672 @@
 
     renderIssuesList();
     sideBody.appendChild(sec);
+  };
+
+  // Çizim/Polygon Düzenleme Paneli
+  ns.renderDrawingPanel = function() {
+    const { sideBody } = ns.dom || {};
+    if (!sideBody) return;
+
+    const drawing = ns.state.drawings.find(d => d.id === ns.state.selectedDrawingId);
+    if (!drawing) {
+      ns.state.selectedDrawingId = null;
+      ns.renderSidePanel();
+      return;
+    }
+
+    const isEditor = ns.state.mode === 'editor';
+    const container = document.createElement('div');
+    container.className = 'side-section';
+
+    // Başlık
+    const header = document.createElement('h3');
+    header.textContent = drawing.type === 'line' ? '🛣️ Çizgi Bilgileri' : 
+                        drawing.type === 'curve' ? '↗️ Eğri Bilgileri' : 
+                        drawing.type === 'polygon' ? '🔷 Alan Bilgileri' :
+                        drawing.type === 'label' ? '🏷️ Etiket Bilgileri' :
+                        drawing.type === 'poi' ? '📍 Nokta Bilgileri' :
+                        '📍 Çizim Bilgileri';
+    container.appendChild(header);
+    
+    // VIEWER MODUNDA SADECE BİLGİLERİ GÖSTER
+    if (!isEditor) {
+      // Tür
+      if (drawing.lineType) {
+        const typeRow = document.createElement('div');
+        typeRow.style.marginTop = '12px';
+        typeRow.style.padding = '12px';
+        typeRow.style.background = '#1e293b';
+        typeRow.style.borderRadius = '6px';
+        
+        const typeLabel = document.createElement('div');
+        typeLabel.style.fontSize = '11px';
+        typeLabel.style.color = '#94a3b8';
+        typeLabel.style.marginBottom = '4px';
+        typeLabel.textContent = 'Tür:';
+        typeRow.appendChild(typeLabel);
+        
+        const typeValue = document.createElement('div');
+        typeValue.style.fontSize = '14px';
+        typeValue.style.color = '#e2e8f0';
+        typeValue.style.fontWeight = '500';
+        const typeLabels = {
+          yol: '🛣️ Yol',
+          menfez: '🌉 Menfez',
+          altyapi: '⚡ Altyapı',
+          diger: '➖ Diğer'
+        };
+        typeValue.textContent = typeLabels[drawing.lineType] || drawing.lineType;
+        typeRow.appendChild(typeValue);
+        container.appendChild(typeRow);
+      }
+      
+      // Başlık
+      if (drawing.title) {
+        const titleRow = document.createElement('div');
+        titleRow.style.marginTop = '12px';
+        titleRow.style.padding = '12px';
+        titleRow.style.background = '#1e293b';
+        titleRow.style.borderRadius = '6px';
+        
+        const titleLabel = document.createElement('div');
+        titleLabel.style.fontSize = '11px';
+        titleLabel.style.color = '#94a3b8';
+        titleLabel.style.marginBottom = '4px';
+        titleLabel.textContent = 'Başlık:';
+        titleRow.appendChild(titleLabel);
+        
+        const titleValue = document.createElement('div');
+        titleValue.style.fontSize = '14px';
+        titleValue.style.color = '#e2e8f0';
+        titleValue.style.fontWeight = '500';
+        titleValue.textContent = drawing.title;
+        titleRow.appendChild(titleValue);
+        container.appendChild(titleRow);
+      }
+      
+      // Açıklama
+      if (drawing.description) {
+        const descRow = document.createElement('div');
+        descRow.style.marginTop = '12px';
+        descRow.style.padding = '12px';
+        descRow.style.background = '#1e293b';
+        descRow.style.borderRadius = '6px';
+        
+        const descLabel = document.createElement('div');
+        descLabel.style.fontSize = '11px';
+        descLabel.style.color = '#94a3b8';
+        descLabel.style.marginBottom = '4px';
+        descLabel.textContent = 'Açıklama:';
+        descRow.appendChild(descLabel);
+        
+        const descValue = document.createElement('div');
+        descValue.style.fontSize = '13px';
+        descValue.style.color = '#cbd5e1';
+        descValue.style.lineHeight = '1.5';
+        descValue.style.whiteSpace = 'pre-wrap';
+        descValue.textContent = drawing.description;
+        descRow.appendChild(descValue);
+        container.appendChild(descRow);
+      }
+      
+      // Fotoğraflar
+      if (drawing.photos && drawing.photos.length > 0) {
+        const photosLabel = document.createElement('div');
+        photosLabel.style.fontSize = '11px';
+        photosLabel.style.color = '#94a3b8';
+        photosLabel.style.marginTop = '16px';
+        photosLabel.style.marginBottom = '8px';
+        photosLabel.textContent = 'Fotoğraflar:';
+        container.appendChild(photosLabel);
+        
+        drawing.photos.forEach(photo => {
+          const photoCard = document.createElement('div');
+          photoCard.style.marginBottom = '12px';
+          photoCard.style.padding = '12px';
+          photoCard.style.background = '#1e293b';
+          photoCard.style.borderRadius = '6px';
+          
+          const img = document.createElement('img');
+          img.src = photo.url;
+          img.style.width = '100%';
+          img.style.height = 'auto';
+          img.style.borderRadius = '4px';
+          img.style.cursor = 'pointer';
+          img.style.marginBottom = '8px';
+          img.addEventListener('click', () => {
+            window.open(photo.url, '_blank');
+          });
+          photoCard.appendChild(img);
+          
+          if (photo.caption) {
+            const caption = document.createElement('div');
+            caption.style.fontSize = '13px';
+            caption.style.color = '#cbd5e1';
+            caption.style.lineHeight = '1.5';
+            caption.textContent = photo.caption;
+            photoCard.appendChild(caption);
+          }
+          
+          container.appendChild(photoCard);
+        });
+      }
+      
+      sideBody.appendChild(container);
+      return;
+    }
+
+    // EDITOR MODUNDA FORM GÖSTER
+    // Çizgi/Eğri/Poligon için tip seçimi
+    if (drawing.type === 'line' || drawing.type === 'curve' || drawing.type === 'polygon') {
+      const typeLabel = document.createElement('label');
+      typeLabel.textContent = 'Tür:';
+      typeLabel.style.display = 'block';
+      typeLabel.style.marginTop = '12px';
+      container.appendChild(typeLabel);
+
+      const typeSelect = document.createElement('select');
+      typeSelect.style.width = '100%';
+      typeSelect.style.padding = '8px';
+      typeSelect.style.marginTop = '4px';
+      
+      const types = [
+        { value: 'yol', label: '🛣️ Yol' },
+        { value: 'menfez', label: '🌉 Menfez' },
+        { value: 'altyapi', label: '⚡ Altyapı' },
+        { value: 'diger', label: '➖ Diğer' }
+      ];
+      
+      types.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.value;
+        opt.textContent = t.label;
+        if (drawing.lineType === t.value) opt.selected = true;
+        typeSelect.appendChild(opt);
+      });
+      
+      typeSelect.addEventListener('change', () => {
+        drawing.lineType = typeSelect.value;
+        ns.renderDrawings();
+      });
+      
+      container.appendChild(typeSelect);
+    }
+
+    // Başlık
+    const titleLabel = document.createElement('label');
+    titleLabel.textContent = 'Başlık:';
+    titleLabel.style.display = 'block';
+    titleLabel.style.marginTop = '12px';
+    container.appendChild(titleLabel);
+
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.placeholder = 'Örn: Bina arası yol';
+    titleInput.value = drawing.title || '';
+    titleInput.style.width = '100%';
+    titleInput.style.padding = '8px';
+    titleInput.style.marginTop = '4px';
+    titleInput.addEventListener('input', () => {
+      drawing.title = titleInput.value.trim();
+    });
+    container.appendChild(titleInput);
+
+    // Açıklama
+    const descLabel = document.createElement('label');
+    descLabel.textContent = 'Açıklama:';
+    descLabel.style.display = 'block';
+    descLabel.style.marginTop = '12px';
+    container.appendChild(descLabel);
+
+    const descTextarea = document.createElement('textarea');
+    descTextarea.placeholder = 'Detaylı açıklama...';
+    descTextarea.value = drawing.description || '';
+    descTextarea.rows = 3;
+    descTextarea.style.width = '100%';
+    descTextarea.style.padding = '8px';
+    descTextarea.style.marginTop = '4px';
+    descTextarea.style.resize = 'vertical';
+    descTextarea.addEventListener('input', () => {
+      drawing.description = descTextarea.value.trim();
+    });
+    container.appendChild(descTextarea);
+
+    // Label-specific controls
+    if (drawing.type === 'label') {
+      // Text content
+      const textLabel = document.createElement('label');
+      textLabel.textContent = 'Metin:';
+      textLabel.style.display = 'block';
+      textLabel.style.marginTop = '12px';
+      container.appendChild(textLabel);
+
+      const textInput = document.createElement('input');
+      textInput.type = 'text';
+      textInput.placeholder = 'Etiket metni';
+      textInput.value = drawing.text || '';
+      textInput.style.width = '100%';
+      textInput.style.padding = '8px';
+      textInput.style.marginTop = '4px';
+      textInput.addEventListener('input', () => {
+        drawing.text = textInput.value;
+        ns.renderDrawings();
+      });
+      container.appendChild(textInput);
+
+      // Font size
+      const fontSizeLabel = document.createElement('label');
+      fontSizeLabel.textContent = 'Yazı Boyutu:';
+      fontSizeLabel.style.display = 'block';
+      fontSizeLabel.style.marginTop = '12px';
+      container.appendChild(fontSizeLabel);
+
+      const fontSizeInput = document.createElement('input');
+      fontSizeInput.type = 'number';
+      fontSizeInput.min = '8';
+      fontSizeInput.max = '48';
+      fontSizeInput.value = drawing.fontSize || 14;
+      fontSizeInput.style.width = '100%';
+      fontSizeInput.style.padding = '8px';
+      fontSizeInput.style.marginTop = '4px';
+      fontSizeInput.addEventListener('input', () => {
+        drawing.fontSize = parseInt(fontSizeInput.value) || 14;
+        ns.renderDrawings();
+      });
+      container.appendChild(fontSizeInput);
+
+      // Font weight
+      const fontWeightLabel = document.createElement('label');
+      fontWeightLabel.textContent = 'Yazı Kalınlığı:';
+      fontWeightLabel.style.display = 'block';
+      fontWeightLabel.style.marginTop = '12px';
+      container.appendChild(fontWeightLabel);
+
+      const fontWeightSelect = document.createElement('select');
+      fontWeightSelect.style.width = '100%';
+      fontWeightSelect.style.padding = '8px';
+      fontWeightSelect.style.marginTop = '4px';
+      
+      const weights = [
+        { value: 'normal', label: 'Normal' },
+        { value: 'bold', label: 'Kalın' }
+      ];
+      
+      weights.forEach(w => {
+        const opt = document.createElement('option');
+        opt.value = w.value;
+        opt.textContent = w.label;
+        if (drawing.fontWeight === w.value) opt.selected = true;
+        fontWeightSelect.appendChild(opt);
+      });
+      
+      fontWeightSelect.addEventListener('change', () => {
+        drawing.fontWeight = fontWeightSelect.value;
+        ns.renderDrawings();
+      });
+      
+      container.appendChild(fontWeightSelect);
+
+      // Color
+      const colorLabel = document.createElement('label');
+      colorLabel.textContent = 'Renk:';
+      colorLabel.style.display = 'block';
+      colorLabel.style.marginTop = '12px';
+      container.appendChild(colorLabel);
+
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.value = drawing.color || '#eab308';
+      colorInput.style.width = '100%';
+      colorInput.style.height = '36px';
+      colorInput.style.cursor = 'pointer';
+      colorInput.style.marginTop = '4px';
+      colorInput.addEventListener('input', () => {
+        drawing.color = colorInput.value;
+        ns.renderDrawings();
+      });
+      container.appendChild(colorInput);
+    }
+
+    // POI-specific controls
+    if (drawing.type === 'poi') {
+      // Radius
+      const radiusLabel = document.createElement('label');
+      radiusLabel.textContent = 'Yarıçap:';
+      radiusLabel.style.display = 'block';
+      radiusLabel.style.marginTop = '12px';
+      container.appendChild(radiusLabel);
+
+      const radiusInput = document.createElement('input');
+      radiusInput.type = 'number';
+      radiusInput.min = '3';
+      radiusInput.max = '50';
+      radiusInput.value = drawing.radius || 8;
+      radiusInput.style.width = '100%';
+      radiusInput.style.padding = '8px';
+      radiusInput.style.marginTop = '4px';
+      radiusInput.addEventListener('input', () => {
+        drawing.radius = parseInt(radiusInput.value) || 8;
+        ns.renderDrawings();
+      });
+      container.appendChild(radiusInput);
+    }
+
+    // Renk ve Kalınlık
+    if (drawing.type !== 'label') {  // Label styling is handled above
+      const styleHeader = document.createElement('h4');
+      styleHeader.textContent = 'Görünüm';
+      styleHeader.style.marginTop = '16px';
+      styleHeader.style.marginBottom = '8px';
+      container.appendChild(styleHeader);
+
+      const styleGrid = document.createElement('div');
+      styleGrid.style.display = 'grid';
+      styleGrid.style.gridTemplateColumns = (drawing.type === 'polygon' || drawing.type === 'poi') ? '1fr' : '1fr 1fr';
+      styleGrid.style.gap = '8px';
+
+      if (drawing.type === 'polygon' || drawing.type === 'poi') {
+        // Polygon and POI have separate stroke and fill controls
+      
+      // Çizgi Rengi (Stroke Color)
+      const strokeColorDiv = document.createElement('div');
+      const strokeColorLabel = document.createElement('label');
+      strokeColorLabel.textContent = 'Çizgi Rengi:';
+      strokeColorLabel.style.display = 'block';
+      strokeColorLabel.style.marginBottom = '4px';
+      strokeColorDiv.appendChild(strokeColorLabel);
+
+      const strokeColorInput = document.createElement('input');
+      strokeColorInput.type = 'color';
+      strokeColorInput.value = drawing.strokeColor || '#a855f7';
+      strokeColorInput.style.width = '100%';
+      strokeColorInput.style.height = '36px';
+      strokeColorInput.style.cursor = 'pointer';
+      strokeColorInput.addEventListener('input', () => {
+        drawing.strokeColor = strokeColorInput.value;
+        ns.renderDrawings();
+      });
+      strokeColorDiv.appendChild(strokeColorInput);
+      styleGrid.appendChild(strokeColorDiv);
+
+      // Çizgi Opaklığı (Stroke Opacity)
+      const strokeOpacityDiv = document.createElement('div');
+      const strokeOpacityLabel = document.createElement('label');
+      strokeOpacityLabel.textContent = 'Çizgi Opaklığı:';
+      strokeOpacityLabel.style.display = 'block';
+      strokeOpacityLabel.style.marginBottom = '4px';
+      strokeOpacityDiv.appendChild(strokeOpacityLabel);
+
+      const strokeOpacityInput = document.createElement('input');
+      strokeOpacityInput.type = 'range';
+      strokeOpacityInput.min = '0';
+      strokeOpacityInput.max = '1';
+      strokeOpacityInput.step = '0.1';
+      strokeOpacityInput.value = drawing.strokeOpacity !== undefined ? drawing.strokeOpacity : 1;
+      strokeOpacityInput.style.width = '100%';
+      
+      const strokeOpacityValue = document.createElement('span');
+      strokeOpacityValue.textContent = Math.round((drawing.strokeOpacity !== undefined ? drawing.strokeOpacity : 1) * 100) + '%';
+      strokeOpacityValue.style.marginLeft = '8px';
+      
+      strokeOpacityInput.addEventListener('input', () => {
+        drawing.strokeOpacity = parseFloat(strokeOpacityInput.value);
+        strokeOpacityValue.textContent = Math.round(drawing.strokeOpacity * 100) + '%';
+        ns.renderDrawings();
+      });
+      strokeOpacityDiv.appendChild(strokeOpacityInput);
+      strokeOpacityDiv.appendChild(strokeOpacityValue);
+      styleGrid.appendChild(strokeOpacityDiv);
+
+      // Dolgu Rengi (Fill Color)
+      const fillColorDiv = document.createElement('div');
+      const fillColorLabel = document.createElement('label');
+      fillColorLabel.textContent = 'Dolgu Rengi:';
+      fillColorLabel.style.display = 'block';
+      fillColorLabel.style.marginBottom = '4px';
+      fillColorDiv.appendChild(fillColorLabel);
+
+      const fillColorInput = document.createElement('input');
+      fillColorInput.type = 'color';
+      fillColorInput.value = drawing.fillColor || '#a855f7';
+      fillColorInput.style.width = '100%';
+      fillColorInput.style.height = '36px';
+      fillColorInput.style.cursor = 'pointer';
+      fillColorInput.addEventListener('input', () => {
+        drawing.fillColor = fillColorInput.value;
+        ns.renderDrawings();
+      });
+      fillColorDiv.appendChild(fillColorInput);
+      styleGrid.appendChild(fillColorDiv);
+
+      // Dolgu Opaklığı (Fill Opacity)
+      const fillOpacityDiv = document.createElement('div');
+      const fillOpacityLabel = document.createElement('label');
+      fillOpacityLabel.textContent = 'Dolgu Opaklığı:';
+      fillOpacityLabel.style.display = 'block';
+      fillOpacityLabel.style.marginBottom = '4px';
+      fillOpacityDiv.appendChild(fillOpacityLabel);
+
+      const fillOpacityInput = document.createElement('input');
+      fillOpacityInput.type = 'range';
+      fillOpacityInput.min = '0';
+      fillOpacityInput.max = '1';
+      fillOpacityInput.step = '0.1';
+      fillOpacityInput.value = drawing.fillOpacity !== undefined ? drawing.fillOpacity : 0.3;
+      fillOpacityInput.style.width = '100%';
+      
+      const fillOpacityValue = document.createElement('span');
+      fillOpacityValue.textContent = Math.round((drawing.fillOpacity !== undefined ? drawing.fillOpacity : 0.3) * 100) + '%';
+      fillOpacityValue.style.marginLeft = '8px';
+      
+      fillOpacityInput.addEventListener('input', () => {
+        drawing.fillOpacity = parseFloat(fillOpacityInput.value);
+        fillOpacityValue.textContent = Math.round(drawing.fillOpacity * 100) + '%';
+        ns.renderDrawings();
+      });
+      fillOpacityDiv.appendChild(fillOpacityInput);
+      fillOpacityDiv.appendChild(fillOpacityValue);
+      styleGrid.appendChild(fillOpacityDiv);
+      
+      // Kalınlık
+      const widthDiv = document.createElement('div');
+      const widthLabel = document.createElement('label');
+      widthLabel.textContent = 'Çizgi Kalınlığı:';
+      widthLabel.style.display = 'block';
+      widthLabel.style.marginBottom = '4px';
+      widthDiv.appendChild(widthLabel);
+
+      const widthInput = document.createElement('input');
+      widthInput.type = 'number';
+      widthInput.min = '1';
+      widthInput.max = '10';
+      widthInput.value = drawing.width || 2;
+      widthInput.style.width = '100%';
+      widthInput.style.padding = '8px';
+      widthInput.addEventListener('input', () => {
+        drawing.width = parseInt(widthInput.value) || 2;
+        ns.renderDrawings();
+      });
+      widthDiv.appendChild(widthInput);
+      styleGrid.appendChild(widthDiv);
+      
+    } else {
+      // Line/Curve - simple color and width
+      // Renk
+      const colorDiv = document.createElement('div');
+      const colorLabel = document.createElement('label');
+      colorLabel.textContent = 'Renk:';
+      colorLabel.style.display = 'block';
+      colorLabel.style.marginBottom = '4px';
+      colorDiv.appendChild(colorLabel);
+
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.value = drawing.color || '#eab308';
+      colorInput.style.width = '100%';
+      colorInput.style.height = '36px';
+      colorInput.style.cursor = 'pointer';
+      colorInput.addEventListener('input', () => {
+        drawing.color = colorInput.value;
+        ns.renderDrawings();
+      });
+      colorDiv.appendChild(colorInput);
+      styleGrid.appendChild(colorDiv);
+
+      // Kalınlık
+      const widthDiv = document.createElement('div');
+      const widthLabel = document.createElement('label');
+      widthLabel.textContent = 'Kalınlık:';
+      widthLabel.style.display = 'block';
+      widthLabel.style.marginBottom = '4px';
+      widthDiv.appendChild(widthLabel);
+
+      const widthInput = document.createElement('input');
+      widthInput.type = 'number';
+      widthInput.min = '1';
+      widthInput.max = '10';
+      widthInput.value = drawing.width || 2;
+      widthInput.style.width = '100%';
+      widthInput.style.padding = '8px';
+      widthInput.addEventListener('input', () => {
+        drawing.width = parseInt(widthInput.value) || 2;
+        ns.renderDrawings();
+      });
+      widthDiv.appendChild(widthInput);
+      styleGrid.appendChild(widthDiv);
+    }
+
+    container.appendChild(styleGrid);
+  }  // End of styling section (if not label)
+
+    // Fotoğraflar bölümü
+    const photosLabel = document.createElement('label');
+    photosLabel.textContent = 'Fotoğraflar:';
+    photosLabel.style.display = 'block';
+    photosLabel.style.marginTop = '12px';
+    container.appendChild(photosLabel);
+
+    const photosContainer = document.createElement('div');
+    photosContainer.style.marginTop = '8px';
+
+    const renderPhotos = () => {
+      photosContainer.innerHTML = '';
+      
+      if (!drawing.photos) drawing.photos = [];
+      
+      drawing.photos.forEach((photo, idx) => {
+        const photoCard = document.createElement('div');
+        photoCard.style.display = 'flex';
+        photoCard.style.gap = '8px';
+        photoCard.style.marginBottom = '8px';
+        photoCard.style.padding = '8px';
+        photoCard.style.border = '1px solid #374151';
+        photoCard.style.borderRadius = '4px';
+        
+        const img = document.createElement('img');
+        img.src = photo.url;
+        img.style.width = '60px';
+        img.style.height = '60px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '4px';
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', () => {
+          // Büyük görüntüle
+          const overlay = document.getElementById('detailImageOverlay');
+          const largeImg = document.getElementById('detailImageLarge');
+          if (overlay && largeImg) {
+            largeImg.src = photo.url;
+            overlay.style.display = 'flex';
+          }
+        });
+        photoCard.appendChild(img);
+        
+        const textDiv = document.createElement('div');
+        textDiv.style.flex = '1';
+        
+        const captionInput = document.createElement('input');
+        captionInput.type = 'text';
+        captionInput.placeholder = 'Açıklama...';
+        captionInput.value = photo.caption || '';
+        captionInput.style.width = '100%';
+        captionInput.style.padding = '4px';
+        captionInput.style.marginBottom = '4px';
+        captionInput.addEventListener('input', () => {
+          photo.caption = captionInput.value.trim();
+        });
+        textDiv.appendChild(captionInput);
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '🗑️ Sil';
+        deleteBtn.style.padding = '4px 8px';
+        deleteBtn.style.fontSize = '11px';
+        deleteBtn.addEventListener('click', () => {
+          drawing.photos.splice(idx, 1);
+          renderPhotos();
+        });
+        textDiv.appendChild(deleteBtn);
+        
+        photoCard.appendChild(textDiv);
+        photosContainer.appendChild(photoCard);
+      });
+      
+      // Fotoğraf ekle butonu
+      const addPhotoBtn = document.createElement('button');
+      addPhotoBtn.textContent = '📷 Fotoğraf Ekle';
+      addPhotoBtn.style.width = '100%';
+      addPhotoBtn.style.padding = '8px';
+      addPhotoBtn.style.marginTop = '8px';
+      addPhotoBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.multiple = true;
+        input.addEventListener('change', e => {
+          const files = e.target.files;
+          if (!files.length) return;
+          
+          Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+              drawing.photos.push({
+                url: ev.target.result,
+                caption: ''
+              });
+              renderPhotos();
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+        input.click();
+      });
+      photosContainer.appendChild(addPhotoBtn);
+    };
+    
+    renderPhotos();
+    container.appendChild(photosContainer);
+
+    // Sil butonu
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑️ Çizimi Sil';
+    deleteBtn.style.width = '100%';
+    deleteBtn.style.padding = '10px';
+    deleteBtn.style.marginTop = '16px';
+    deleteBtn.style.backgroundColor = '#dc2626';
+    deleteBtn.addEventListener('click', () => {
+      if (confirm('Bu çizimi silmek istediğinizden emin misiniz?')) {
+        const idx = ns.state.drawings.findIndex(d => d.id === drawing.id);
+        if (idx >= 0) {
+          ns.state.drawings.splice(idx, 1);
+          ns.pushHistory('deleteDrawing');
+          ns.state.selectedDrawingId = null;
+          ns.state.sidePanelVisible = false;
+          ns.renderDrawings();
+          ns.renderSidePanel();
+        }
+      }
+    });
+    container.appendChild(deleteBtn);
+
+    sideBody.appendChild(container);
   };
 })(window.EPP = window.EPP || {});
