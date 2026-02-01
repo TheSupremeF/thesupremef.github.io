@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YENİDEN KURDUĞUMUZ YUVALAR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --p: 0;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      color: #e8e8e8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #c8b4a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 200;
+      letter-spacing: 0.3em;
+      color: rgba(200, 180, 160, 0.7);
+      text-transform: uppercase;
+    }
+    
+    /* Main Compare Container */
+    .compare-wrap {
+      width: min(1100px, 95vw);
+      aspect-ratio: 16/9;
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #111;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      user-select: none;
+      touch-action: none;
+    }
+    
+    .cols {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    .col {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Image Layers */
+    .layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.02);
+    }
+    
+    .sharp {
+      filter: none;
+    }
+    
+    .blur {
+      filter: blur(14px);
+    }
+    
+    /* Left: blur grows from top as slider moves down */
+    .left .blur {
+      clip-path: inset(0 0 calc((1 - var(--p)) * 100%) 0);
+    }
+    
+    /* Right: blur shrinks from top as slider moves down */
+    .right .blur {
+      clip-path: inset(calc(var(--p) * 100%) 0 0 0);
+    }
+    
+    /* Center Divider */
+    .divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.14);
+      z-index: 5;
+    }
+    
+    /* Horizontal Slider Line */
+    .slider-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(var(--p) * 100%);
+      height: 3px;
+      background: rgba(255, 255, 255, 0.85);
+      z-index: 10;
+      cursor: ns-resize;
+    }
+    
+    /* Handle */
+    .handle {
+      position: absolute;
+      left: 50%;
+      top: calc(var(--p) * 100%);
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      background: rgba(20, 20, 28, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      z-index: 11;
+      display: grid;
+      place-items: center;
+      cursor: ns-resize;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    
+    .handle:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    
+    .handle::before {
+      content: "↕";
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    /* Tags */
+    .tag {
+      position: absolute;
+      top: 14px;
+      padding: 8px 14px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(8px);
+      z-index: 12;
+    }
+    
+    .tag.left {
+      left: 14px;
+    }
+    
+    .tag.right {
+      right: 14px;
+    }
+    
+    /* Instruction */
+    .instruction {
+      text-align: center;
+      margin-top: 20px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      color: rgba(200, 180, 160, 0.5);
+      letter-spacing: 0.15em;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .compare-wrap {
+        aspect-ratio: 4/3;
+      }
+      
+      .handle {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .handle::before {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+<img src="images/epp-logo.png" width="20%" height "20%">
+    <p class="subtitle"></p>
+  </header>
+  
+  <div class="compare-wrap" id="wrap">
+    <div class="cols">
+      <!-- Left Column - Before -->
+      <div class="col left">
+        <div class="layer sharp" id="leftSharp"></div>
+        <div class="layer blur" id="leftBlur"></div>
+      </div>
+      
+      <!-- Right Column - After -->
+      <div class="col right">
+        <div class="layer sharp" id="rightSharp"></div>
+        <div class="layer blur" id="rightBlur"></div>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="tag left">Önce</div>
+    <div class="tag right">Sonra</div>
+    
+    <div class="slider-line" id="sliderLine"></div>
+    <div class="handle" id="handle"></div>
+  </div>
+  
+  <p class="instruction">Geçişi görmek için kaydırıcıyı yukarı aşağı sürükleyin</p>
+  
+  <script>
+    // =============================================
+    // GÖRSEL YOLLARI - BU KISMI DEĞİŞTİRİN
+    // =============================================
+    // Kendi görsellerinizi kullanmak için:
+    // 1. Görselleri "images" klasörüne koyun (once.jpg ve sonra.jpg)
+    // 2. Aşağıdaki .svg uzantılarını .jpg olarak değiştirin
+    
+    const IMG_ONCE = "images/once.png";    // Önce görseli (once.jpg yapın)
+    const IMG_SONRA = "images/sonra.png";  // Sonra görseli (sonra.jpg yapın)
+    
+    // =============================================
+    
+    const wrap = document.getElementById("wrap");
+    const leftSharp = document.getElementById("leftSharp");
+    const leftBlur = document.getElementById("leftBlur");
+    const rightSharp = document.getElementById("rightSharp");
+    const rightBlur = document.getElementById("rightBlur");
+    
+    // Görselleri uygula
+    leftSharp.style.backgroundImage = `url(${IMG_ONCE})`;
+    leftBlur.style.backgroundImage = `url(${IMG_ONCE})`;
+    rightSharp.style.backgroundImage = `url(${IMG_SONRA})`;
+    rightBlur.style.backgroundImage = `url(${IMG_SONRA})`;
+    
+    let dragging = false;
+    
+    function setPositionFromY(clientY) {
+      const rect = wrap.getBoundingClientRect();
+      const y = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+      const p = y / rect.height;
+      wrap.style.setProperty("--p", p.toFixed(4));
+    }
+    
+    function onPointerDown(e) {
+      dragging = true;
+      wrap.setPointerCapture?.(e.pointerId);
+      setPositionFromY(e.clientY);
+    }
+    
+    function onPointerMove(e) {
+      if (!dragging) return;
+      setPositionFromY(e.clientY);
+    }
+    
+    function onPointerUp(e) {
+      dragging = false;
+      try {
+        wrap.releasePointerCapture?.(e.pointerId);
+      } catch {}
+    }
+    
+    wrap.addEventListener("pointerdown", onPointerDown);
+    wrap.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    
+    // Başlangıç pozisyonu
+    wrap.style.setProperty("--p", "0");
+  </script>
+</body>
+</html>
